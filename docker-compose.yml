@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  auth_service:
+    build: ./auth_service
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${MONGODB_URL}/${AUTH_DB}
+    depends_on:
+      - mongodb
+
+  admin_backend:
+    build: ./admin_backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+    depends_on:
+      - mysql
+
+  customer_backend:
+    build: ./customer_backend
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}
+    depends_on:
+      - mongodb
+
+  customer_frontend:
+    build: ./customer_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - auth_service
+      - customer_backend
+
+  admin_frontend:
+    build: ./admin_frontend
+    ports:
+      - "8081:81"
+    depends_on:
+      - auth_service
+      - admin_backend
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+  mysql_data:
