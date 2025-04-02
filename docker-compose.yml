@@ -44,7 +44,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      - rabbitmq
     networks:
       - rabbitmq_network
 
