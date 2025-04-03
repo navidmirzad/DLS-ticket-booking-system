@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// ✅ Connect to MongoDB
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.DATABASE_URL);
@@ -21,7 +20,6 @@ const connectToDatabase = async () => {
 
 await connectToDatabase();
 
-// ✅ Routes
 app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 3000;
