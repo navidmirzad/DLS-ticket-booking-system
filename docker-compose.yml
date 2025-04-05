@@ -99,6 +99,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - rabbitmq_network
     healthcheck:
       test:
         [
@@ -121,6 +123,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - rabbitmq_network
 
 volumes:
   mongodb_data:
