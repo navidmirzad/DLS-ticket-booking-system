@@ -1,7 +1,8 @@
-import connection from "../database/connection.js";
+import { getConnection } from "../database/connection.js";
 
 const getEvents = async () => {
   try {
+    const connection = await getConnection();
     const [rows] = await connection.execute(
       "SELECT * FROM events ORDER BY date ASC"
     );
@@ -12,8 +13,9 @@ const getEvents = async () => {
   }
 };
 
-const createEvent = async event => {
+const createEvent = async (event) => {
   try {
+    const connection = await getConnection();
     const [result] = await connection.execute(
       "INSERT INTO events (title, description, date, location) VALUES (?, ?, ?, ?)",
       [event.title, event.description, event.date, event.location]

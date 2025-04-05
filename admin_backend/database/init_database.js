@@ -20,7 +20,7 @@ async function createDatabase() {
         description TEXT,
         location VARCHAR(255),
         date DATETIME,
-        capacity INT,
+        capacity INT, 
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
