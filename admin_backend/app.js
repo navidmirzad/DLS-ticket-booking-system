@@ -1,10 +1,17 @@
-import express from "express";
 import dotenv from "dotenv";
+import express from "express";
 import { getEvents, createEvent } from "./services/eventService.js";
 import createDatabase from "./database/init_database.js";
+import cors from "cors";
 const app = express();
 
 dotenv.config();
+
+app.use(
+  cors({
+    origin: [process.env.LOCAL_ENV, process.env.ADMIN_FRONTEND],
+  })
+);
 
 app.use(express.json());
 
