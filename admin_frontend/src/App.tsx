@@ -10,6 +10,7 @@ import { Routes, Route } from "react-router-dom"
 import ViewEvent from "./pages/ViewEvent"
 import CreateEvent from "./pages/CreateEvent"
 import EditEvent from "./pages/EditEvent"
+import SUIIII from "./components/SUIIII"
 
 function App() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -29,6 +30,7 @@ function App() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <SUIIII />
       <main className="px-4 py-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-center">
           Event List
