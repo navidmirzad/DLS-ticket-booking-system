@@ -1,4 +1,5 @@
 import { Event } from "../types/Event";
+import { Link } from "react-router-dom"
 
 interface Props {
   event: Event;
@@ -15,13 +16,13 @@ const EventCard = ({ event }: Props) => {
         <span className="font-medium">Location:</span> {event.location}
       </p>
       <div className="flex gap-2 flex-wrap mt-4">
-        <button className="text-white px-4 py-2 rounded bg-blue-600">
-          <a href="#">View Event</a>
-        </button>
-        <button className="text-white px-4 py-2 rounded bg-yellow-600">
-          <a href="#">Edit Event</a>
-        </button>
-        <button className="text-white px-4 py-2 rounded bg-red-600">
+      <Link to={`/event/${event.id}`} className="bg-gray-900 text-white px-4 py-4 rounded">
+          View
+        </Link>
+        <Link to={`/event/${event.id}/edit`} className="bg-gray-900 text-white px-4 py-4 rounded">
+          Edit
+        </Link>
+        <button className="text-white px-4 py-2 rounded">
           <a href="#">Delete Event</a>
         </button>
       </div>
