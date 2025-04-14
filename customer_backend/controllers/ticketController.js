@@ -3,7 +3,7 @@ import { getTicketByID as getTicketByIDService, getTicketsByUserID as getTickets
 export const getTicketByID = async (req, res) => {
     try {
         const ticketId = parseInt(req.params.ticketId);
-        const tickets = getTicketByIDService(ticketId);
+        const tickets = await getTicketByIDService(ticketId);
         res.send({ data: tickets });
     } catch(err) {
         res.status(500).send({ error: err.message });
@@ -13,7 +13,7 @@ export const getTicketByID = async (req, res) => {
 export const getTicketsByUserID = async (req, res) => {
     try {
         const userId = parseInt(req.params.userId);
-        const tickets = getTicketsByUserIDService(userId);
+        const tickets = await getTicketsByUserIDService(userId);
         res.send({ data: tickets });
     } catch(err) {
         res.status(500).send({ error: err.message });

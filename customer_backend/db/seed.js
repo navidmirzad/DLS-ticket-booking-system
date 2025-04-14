@@ -8,7 +8,6 @@ export const seedMongo = async () => {
 
     const events = await Event.insertMany([
       {
-        id: 1,
         title: "Sample Event",
         description: "This is a sample event.",
         location: "City A",
@@ -20,7 +19,6 @@ export const seedMongo = async () => {
 
     await Ticket.insertMany([
       {
-        id: 1,
         user_id: 42,
         event: {
           id: events[0].id,
