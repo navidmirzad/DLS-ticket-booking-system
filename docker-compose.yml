@@ -51,6 +51,8 @@ services:
     build: ./customer_backend
     ports:
       - "3002:3002"
+    env_file:
+      - ".env"
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}

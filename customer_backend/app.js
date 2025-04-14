@@ -1,14 +1,21 @@
 import express from "express";
 import dotenv from "dotenv";
-const app = express();
+import connectMongo from "./db/mongo.js";
+import { seedMongo } from "./db/seed.js";
 
+const app = express();
 dotenv.config();
 
-app.get("/api/customer", (req, res) => {
-  res.send({ data: "Hello from customer backend" });
-});
+await connectMongo();
+await seedMongo();
 
-const PORT = process.env.CUSTOMER_BACKEND_PORT;
+import ticketRouter from "./routes/ticketRouter.js";
+app.use(ticketRouter);
+
+import eventRouter from "./routes/eventRouter.js";
+app.use(eventRouter);
+
+const PORT = process.env.CUSTOMER_BACKEND_PORT || 3002;
 app.listen(PORT, () => {
   console.log("Customer backend is running on PORT: ", PORT);
 });
