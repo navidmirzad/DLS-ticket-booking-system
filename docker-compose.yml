@@ -22,7 +22,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${AUTH_DB}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=amqp://admin:admin@localhost
     depends_on:
       - mongodb
       - rabbitmq
@@ -40,7 +40,7 @@ services:
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_NAME=${MYSQL_DATABASE}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=amqp://admin:admin@localhost
     depends_on:
       mysql:
         condition: service_healthy
@@ -56,7 +56,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=amqp://admin:admin@localhost
     depends_on:
       - mongodb
       - rabbitmq
@@ -72,7 +72,7 @@ services:
       - customer_backend
       - rabbitmq
     environment:
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=amqp://admin:admin@localhost
     networks:
       - rabbitmq_network
 
@@ -85,7 +85,7 @@ services:
       - admin_backend
       - rabbitmq
     environment:
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=amqp://admin:admin@localhost
     networks:
       - rabbitmq_network
 
