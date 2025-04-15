@@ -9,6 +9,8 @@ dotenv.config();
 await connectMongo();
 await seedMongo();
 
+app.use(express.json());
+
 import ticketRouter from "./routes/ticketRouter.js";
 app.use(ticketRouter);
 

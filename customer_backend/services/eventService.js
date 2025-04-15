@@ -5,5 +5,5 @@ export const getEvents = async () => {
 }
 
 export const getEventByID = async (eventId) => {
-    return await Event.find({ id: eventId });
+    return await Event.find({ _id: eventId });
 }

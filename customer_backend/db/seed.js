@@ -19,13 +19,31 @@ export const seedMongo = async () => {
 
     await Ticket.insertMany([
       {
-        user_id: 42,
-        event: {
-          id: events[0].id,
-          title: events[0].title,
-          location: events[0].location,
-          date: events[0].date,
-        },
+        eventId: events[0]._id,
+        userId: 1,
+        email: "john@doe.com",
+        purchasedAt: new Date()
+      },
+
+      {
+        eventId: events[0]._id,
+        userId: 1,
+        email: "john@doe.com",
+        purchasedAt: new Date()
+      },
+
+      {
+        eventId: events[0]._id,
+        userId: 1,
+        email: "john@doe.com",
+        purchasedAt: new Date()
+      },
+
+      {
+        eventId: events[0]._id,
+        userId: 1,
+        email: "john@doe.com",
+        purchasedAt: new Date()
       },
     ]);
 
