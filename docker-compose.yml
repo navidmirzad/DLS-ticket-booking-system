@@ -22,7 +22,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${AUTH_DB}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=${RABBITMQ_URL}
     depends_on:
       - mongodb
       - rabbitmq
@@ -40,7 +40,7 @@ services:
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_NAME=${MYSQL_DATABASE}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=${RABBITMQ_URL}
     depends_on:
       mysql:
         condition: service_healthy
@@ -51,10 +51,12 @@ services:
     build: ./customer_backend
     ports:
       - "3002:3002"
+    env_file:
+      - ".env"
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=${RABBITMQ_URL}
     depends_on:
       - mongodb
       - rabbitmq
@@ -70,7 +72,7 @@ services:
       - customer_backend
       - rabbitmq
     environment:
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=${RABBITMQ_URL}
     networks:
       - rabbitmq_network
 
@@ -83,7 +85,21 @@ services:
       - admin_backend
       - rabbitmq
     environment:
-      - RABBITMQ_URL=amqp://admin:admin@rabbitmq
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    networks:
+      - rabbitmq_network
+
+  mail_service:
+    build: ./mail_service
+    ports:
+      - "3003:3003"
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
     networks:
       - rabbitmq_network
 
