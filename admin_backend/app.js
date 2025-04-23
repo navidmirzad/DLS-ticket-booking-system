@@ -1,6 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import dotenv from "dotenv";
 import express from "express";
-import { getEvents, createEvent } from "./services/eventService.js";
+import {
+  getEvents,
+  getEvent,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from "./services/eventService.js";
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
 const app = express();
@@ -30,6 +37,20 @@ app.get("/api/admin/events", async (req, res) => {
   }
 });
 
+app.get("/api/admin/events/:id", async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const event = await getEvent(eventId);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.status(200).json({ data: event });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch event" });
+  }
+});
+
 app.post("/api/admin/events", async (req, res) => {
   try {
     const event = req.body;
@@ -37,6 +58,27 @@ app.post("/api/admin/events", async (req, res) => {
     res.json({ data: newEvent });
   } catch (error) {
     res.status(500).json({ error: "Failed to create event" });
+  }
+});
+
+app.patch("/api/admin/events/:id", async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const event = req.body;
+    const updatedEvent = await updateEvent(eventId, event);
+    res.json({ data: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update event" });
+  }
+});
+
+app.delete("/api/admin/events/:id", async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    await deleteEvent(eventId);
+    res.json({ message: "Event deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete event" });
   }
 });
 

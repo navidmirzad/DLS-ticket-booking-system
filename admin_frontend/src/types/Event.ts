@@ -1,10 +1,11 @@
 export interface Event {
-    id: number;
+    id: string;
     title: string;
-    description: Text;
+    description: string;
     location: string;
     date: Date;
     capacity: number;
     created_at: Date;
+    updated_at: Date;
   }
   
