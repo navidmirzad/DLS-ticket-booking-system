@@ -8,9 +8,8 @@ import { Routes, Route } from "react-router-dom"
 
 // pages
 import ViewEvent from "./pages/ViewEvent"
-import CreateEvent from "./pages/CreateEvent"
-import EditEvent from "./pages/EditEvent"
-import SUIIII from "./components/SUIIII"
+import EventForm from "./pages/EventForm"
+/* import SUIIII from "./components/SUIIII" */
 
 function App() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -30,16 +29,17 @@ function App() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <SUIIII />
+      {/* <SUIIII /> */}
       <main className="px-4 py-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-center">
           Event List
         </h1>
         <Routes>
           <Route path="/" element={<EventList events={events} />} />
-          <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/event/:id" element={<ViewEvent />} />
-          <Route path="/edit/:id/edit" element={<EditEvent />} />
+          <Route path="/create-event" element={<EventForm />} />
+          <Route path="/events/:id" element={<ViewEvent />} />
+          <Route path="/events/:id/edit" element={<EventForm />} />
+          <Route path="*" element={<h2 className="text-center text-red-600">404 - Page Not Found</h2>} />
         </Routes>
       </main>
     </div>
