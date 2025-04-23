@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Lato', system-ui, sans-serif;
+    @apply text-text scroll-smooth;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    @apply font-medium leading-tight;
+  }
+  
+  p {
+    @apply leading-relaxed;
+  }
+
+  body {
+    @apply bg-primary min-h-screen;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium rounded-lg transition-all duration-300 focus:outline-none;
+  }
+  
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent/90 focus:ring-2 focus:ring-accent/50;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-text hover:bg-secondary/80 focus:ring-2 focus:ring-secondary/50;
+  }
+  
+  .btn-outline {
+    @apply border border-accent text-accent hover:bg-accent hover:text-white focus:ring-2 focus:ring-accent/50;
+  }
+
+  .container-custom {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-accent focus:ring focus:ring-accent/20 focus:outline-none transition-all duration-300;
+  }
+
+  .section {
+    @apply py-12 md:py-20;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}

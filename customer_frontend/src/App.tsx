@@ -1,13 +1,28 @@
-import { useState } from 'react'
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import HomePage from './pages/HomePage';
+import EventsPage from './pages/EventsPage';
+import EventDetailPage from './pages/EventDetailPage';
+import BookingPage from './pages/BookingPage';
+import CheckoutPage from './pages/CheckoutPage';
+import AccountPage from './pages/AccountPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
-  const [title] = useState('Customer frontend')
-
   return (
-    <>
-    <h3>{title}</h3>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:id" element={<EventDetailPage />} />
+        <Route path="booking/:id" element={<BookingPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="account" element={<AccountPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
