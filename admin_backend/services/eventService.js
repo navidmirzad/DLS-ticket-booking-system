@@ -13,6 +13,20 @@ const getEvents = async () => {
   }
 };
 
+const getEvent = async (eventId) => {
+  try {
+    const connection = await getConnection();
+    const [rows] = await connection.execute(
+      "SELECT * FROM events WHERE id = ?",
+      [eventId]
+    );
+    return rows[0];
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    throw error;
+  }
+};
+
 const createEvent = async (event) => {
   try {
     const connection = await getConnection();
@@ -27,4 +41,32 @@ const createEvent = async (event) => {
   }
 };
 
-export { getEvents, createEvent };
+const updateEvent = async (eventId, event) => {
+  try {
+    const connection = await getConnection();
+    const [result] = await connection.execute(
+      "UPDATE events SET title = ?, description = ?, date = ?, location = ? WHERE id = ?",
+      [event.title, event.description, event.date, event.location, eventId]
+    );
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating event:", error);
+    throw error;
+  }
+};
+
+const deleteEvent = async (eventId) => {
+  try {
+    const connection = await getConnection();
+    const [result] = await connection.execute(
+      "DELETE FROM events WHERE id = ?",
+      [eventId]
+    );
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    throw error;
+  }
+};
+
+export { getEvents, getEvent, createEvent, updateEvent, deleteEvent };
