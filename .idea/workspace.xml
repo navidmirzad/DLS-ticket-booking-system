@@ -4,11 +4,43 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="merge w. main" />
+    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="merge w. main">
+      <change afterPath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/admin_backend/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/layout/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/layout/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/data/eventData.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/AccountPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/AccountPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mail_service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/mail_service/Dockerfile" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -34,7 +66,9 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="2vMIO2Osa4QLDFLHyTb09Hpt1oP" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -46,12 +80,14 @@
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/danie/IdeaProjects/SoftwareUdvikling/DLS/TicketBookingSystem/customer_frontend",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.general",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "ts.external.directory.path": "C:\\Users\\danie\\IdeaProjects\\SoftwareUdvikling\\DLS\\TicketBookingSystem\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -96,6 +132,7 @@
       <workItem from="1745305502592" duration="680000" />
       <workItem from="1745390459815" duration="65000" />
       <workItem from="1745390536813" duration="626000" />
+      <workItem from="1745394154320" duration="22581000" />
     </task>
     <task id="LOCAL-00001" summary="merge w. main">
       <option name="closed" value="true" />
@@ -105,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743950097412</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="merge w. main">
+      <option name="closed" value="true" />
+      <created>1745391766693</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1745391766693</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

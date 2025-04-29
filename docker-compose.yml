@@ -14,6 +14,13 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
     networks:
       - rabbitmq_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
 
   auth_service:
     build: ./auth_service
@@ -96,12 +103,13 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      - RABBITMQ_URL=${RABBITMQ_URL}
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
     networks:
       - rabbitmq_network
+
 
   mysql:
     image: mysql:8.0

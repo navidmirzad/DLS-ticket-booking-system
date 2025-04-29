@@ -1,10 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from 'cors';
 import connectMongo from "./db/mongo.js";
 import { seedMongo } from "./db/seed.js";
 
 const app = express();
 dotenv.config();
+
+app.use(cors({
+  origin: 'http://localhost:8080',  // Ensure this matches your frontend URL
+}));
 
 await connectMongo();
 await seedMongo();
