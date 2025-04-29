@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Calendar,
   Clock,
@@ -12,75 +11,102 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { getEventById } from '../services/api';
-import { EventType } from '../types/eventTypes';
+import {
+  getEventById,
+  getTicketTypesForEvent,
+  Event,
+  TicketType
+} from '../services/api';
 import { formatDate, formatShortDate, formatTime } from '../utils/dateUtils';
-import EventCard from '../components/events/EventCard';
+
+// Enhanced date validation function
+const isValidDate = (dateString: string | Date | undefined | null): boolean => {
+  if (!dateString) return false;
+
+  try {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  } catch (e) {
+    return false;
+  }
+};
+
+// Safe formatting functions with fallbacks
+const safeFormatDate = (dateString: string | Date | undefined | null): string => {
+  return isValidDate(dateString) ? formatDate(String(dateString)) : "Date TBD";
+};
+
+const safeFormatShortDate = (dateString: string | Date | undefined | null): string => {
+  return isValidDate(dateString) ? formatShortDate(String(dateString)) : "Date TBD";
+};
+
+const safeFormatTime = (dateString: string | Date | undefined | null): string => {
+  return isValidDate(dateString) ? formatTime(String(dateString)) : "Time TBD";
+};
 
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [event, setEvent] = useState<EventType | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+  const [selectedTicketType, setSelectedTicketType] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [selectedTickets, setSelectedTickets] = useState(0);
 
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventData = async () => {
       if (!id) return;
 
       try {
         setIsLoading(true);
-        const response = await getEventById(id);
+        console.log(`Fetching event with ID: ${id}`);
 
-        // Transform backend event to match frontend EventType
-        const transformedEvent: EventType = {
-          id: response._id,
-          title: response.title,
-          category: 'General',
-          date: new Date(response.date).toISOString(),
-          venue: response.location,
-          location: response.location,
-          imageUrl: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg', // Placeholder image
-          description: response.description,
-          featured: false,
-          tags: ['Event'],
-          availableTickets: response.capacity,
-        };
+        // Fetch event details
+        const eventData = await getEventById(id);
+        console.log('Fetched event data:', eventData);
 
-        setEvent(transformedEvent);
+        // Fetch ticket types
+        const ticketTypesData = await getTicketTypesForEvent(id);
+        console.log('Fetched ticket types:', ticketTypesData);
+
+        // Store debug info for troubleshooting
+        setDebugInfo({
+          event: eventData,
+          ticketTypes: ticketTypesData
+        });
+
+        // Validate response before setting state
+        if (!eventData) {
+          throw new Error('Event not found');
+        }
+
+        setEvent(eventData);
+        setTicketTypes(ticketTypesData);
+
+        // Set the default selected ticket type to the first one
+        if (ticketTypesData.length > 0) {
+          setSelectedTicketType(ticketTypesData[0].id);
+        }
+
       } catch (err) {
         setError('Failed to fetch event details');
         console.error('Error fetching event:', err);
+        setDebugInfo(err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchEvent();
+    fetchEventData();
   }, [id]);
 
-  // We don't use price anymore since it's not in the backend model
-  const ticketTypes = [
-    {
-      id: 't1',
-      name: 'General Admission',
-      description: 'Standard entry to the event',
-      available: 200
-    },
-    {
-      id: 't2',
-      name: 'VIP Access',
-      description: 'Premium seating and exclusive perks',
-      available: 50
-    },
-    {
-      id: 't3',
-      name: 'Premium Package',
-      description: 'All-inclusive experience with backstage access',
-      available: 20
-    }
-  ];
+  const handleTicketTypeChange = (ticketTypeId: string) => {
+    setSelectedTicketType(ticketTypeId);
+    // Reset ticket count when changing ticket type
+    setSelectedTickets(0);
+  };
 
   const handleTicketChange = (amount: number) => {
     const newAmount = selectedTickets + amount;
@@ -89,7 +115,7 @@ const EventDetailPage: React.FC = () => {
 
   const handleBookNow = () => {
     if (selectedTickets > 0 && event) {
-      navigate(`/booking/${event.id}?tickets=${selectedTickets}`);
+      navigate(`/booking/${event._id}?tickets=${selectedTickets}&ticketType=${selectedTicketType}`);
     }
   };
 
@@ -106,48 +132,50 @@ const EventDetailPage: React.FC = () => {
 
   if (error || !event) {
     return (
-        <div className="container-custom py-20 text-center">
+        <div className="container-custom py-20">
           <h1 className="text-3xl font-bold text-text mb-4">Event Not Found</h1>
-          <p className="text-text-secondary mb-8">
+          <p className="text-text-secondary mb-6">
             {error || "The event you're looking for doesn't exist or has been removed."}
           </p>
-          <Link to="/events" className="btn btn-primary">
-            Browse Events
-          </Link>
+
+          <div className="mt-6">
+            <Link to="/events" className="btn btn-primary px-4 py-2 bg-accent text-white rounded-lg">
+              Browse Events
+            </Link>
+          </div>
         </div>
     );
   }
+
+  // Default image if none is provided in the API response
+  const defaultImage = 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
+
+  // Get the currently selected ticket type object
+  const currentTicketType = ticketTypes.find(ticket => ticket.id === selectedTicketType) || ticketTypes[0];
 
   return (
       <div className="bg-primary">
         {/* Hero Section */}
         <div
             className="relative bg-cover bg-center h-96 md:h-[500px]"
-            style={{ backgroundImage: `url(${event.imageUrl})` }}
+            style={{ backgroundImage: `url(${defaultImage})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <div className="container-custom relative z-10 h-full flex flex-col justify-end pb-12">
             <div className="text-white">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {event.tags.map((tag) => (
-                    <span key={tag} className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium">
-                  {tag}
-                </span>
-                ))}
-              </div>
               <h1 className="text-3xl md:text-5xl font-bold mb-2">{event.title}</h1>
               <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-white/80">
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                  <span>{formatShortDate(event.date)}</span>
+                  <span>{safeFormatShortDate(event.date)}</span>
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                  <span>{formatTime(event.date)}</span>
+                  <span>{safeFormatTime(event.date)}</span>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                  <span>{event.venue}, {event.location}</span>
+                  <span>{event.location || 'Location TBD'}</span>
                 </div>
               </div>
             </div>
@@ -172,7 +200,7 @@ const EventDetailPage: React.FC = () => {
                 </div>
 
                 <div className="prose max-w-none text-neutral-700 leading-relaxed">
-                  <p className="mb-6 text-lg">{event.description}</p>
+                  <p className="mb-6 text-lg">{event.description || 'No description available'}</p>
 
                   <div className="border-t border-neutral-100 pt-6 mt-6">
                     <h3 className="flex items-center text-lg font-medium text-text mb-4">
@@ -185,7 +213,7 @@ const EventDetailPage: React.FC = () => {
                         <Calendar className="h-5 w-5 mr-3 mt-0.5 text-text-secondary" strokeWidth={1.5} />
                         <div>
                           <h4 className="font-medium text-text">Date and Time</h4>
-                          <p className="text-neutral-600">{formatDate(event.date)}</p>
+                          <p className="text-neutral-600">{safeFormatDate(event.date)}</p>
                         </div>
                       </div>
 
@@ -193,19 +221,10 @@ const EventDetailPage: React.FC = () => {
                         <MapPin className="h-5 w-5 mr-3 mt-0.5 text-text-secondary" strokeWidth={1.5} />
                         <div>
                           <h4 className="font-medium text-text">Location</h4>
-                          <p className="text-neutral-600">{event.venue}</p>
-                          <p className="text-neutral-600">{event.location}</p>
+                          <p className="text-neutral-600">{event.location || 'Location TBD'}</p>
                           <a href="#" className="text-accent hover:underline text-sm mt-1 inline-block">
                             View on map
                           </a>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start">
-                        <Tag className="h-5 w-5 mr-3 mt-0.5 text-text-secondary" strokeWidth={1.5} />
-                        <div>
-                          <h4 className="font-medium text-text">Category</h4>
-                          <p className="text-neutral-600">{event.category}</p>
                         </div>
                       </div>
                     </div>
@@ -227,84 +246,81 @@ const EventDetailPage: React.FC = () => {
 
             {/* Ticket Selection */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden sticky top-24">
-                <div className="bg-accent text-white p-5">
-                  <h2 className="text-xl font-medium mb-1">Tickets</h2>
-                  <p className="opacity-90 text-sm">Select your tickets to proceed</p>
+              <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
+                <h2 className="text-xl font-bold text-text mb-6">Get Tickets</h2>
+
+                <div className="space-y-4 mb-6">
+                  {ticketTypes.map(ticket => (
+                      <div
+                          key={ticket.id}
+                          className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition-all duration-300
+                      ${ticket.id === selectedTicketType
+                              ? 'border-accent bg-accent/5'
+                              : 'border-neutral-100 hover:border-accent/30'}`}
+                          onClick={() => handleTicketTypeChange(ticket.id)}
+                      >
+                        <div>
+                          <h4 className="font-medium text-text">{ticket.name}</h4>
+                          <p className="text-sm text-neutral-600">{ticket.description}</p>
+                          <p className="text-xs text-neutral-500 mt-1">{ticket.available} tickets available</p>
+                          <p className="text-sm font-semibold text-accent mt-1">${ticket.price.toFixed(2)}</p>
+                        </div>
+                        <div className="h-5 w-5 rounded-full border-2 flex items-center justify-center">
+                          {ticket.id === selectedTicketType && (
+                              <div className="h-3 w-3 rounded-full bg-accent"></div>
+                          )}
+                        </div>
+                      </div>
+                  ))}
                 </div>
 
-                <div className="p-5">
-                  <div className="mb-6">
-                    <div className="flex justify-between text-sm text-neutral-600 mb-2">
-                      <span>Ticket Type</span>
-                      <span>Price</span>
-                    </div>
-
-                    <div className="space-y-4">
-                      {ticketTypes.map((ticket) => (
-                          <div
-                              key={ticket.id}
-                              className="border border-neutral-200 rounded-lg p-4 hover:border-accent/50 transition-all duration-300"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h3 className="font-medium text-text">{ticket.name}</h3>
-                                <p className="text-sm text-neutral-500">{ticket.description}</p>
-                              </div>
-                              <span className="font-medium text-lg text-text">TBD</span>
-                            </div>
-
-                            <div className="flex justify-between items-center mt-4">
-                          <span className="text-sm text-neutral-500">
-                            {ticket.available} available
-                          </span>
-
-                              <div className="flex items-center">
-                                <button
-                                    className="p-1 rounded-lg bg-neutral-100 hover:bg-secondary transition-all duration-300"
-                                    onClick={() => handleTicketChange(-1)}
-                                >
-                                  <Minus className="h-4 w-4 text-text" />
-                                </button>
-                                <span className="w-10 text-center">{selectedTickets}</span>
-                                <button
-                                    className="p-1 rounded-lg bg-neutral-100 hover:bg-secondary transition-all duration-300"
-                                    onClick={() => handleTicketChange(1)}
-                                >
-                                  <Plus className="h-4 w-4 text-text" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-neutral-100 pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-neutral-600">Tickets</span>
-                      <span className="font-medium text-text">{selectedTickets}</span>
-                    </div>
-
-
-                    <div className="flex justify-between mb-4">
-                      <span className="text-neutral-600">Total</span>
-                      <span className="font-bold text-lg text-text">TBD</span>
-                    </div>
-
+                <div className="flex justify-between items-center mb-6">
+                  <div className="font-medium text-text">Number of tickets</div>
+                  <div className="flex items-center border border-neutral-200 rounded-lg">
                     <button
-                        className={`btn w-full ${selectedTickets > 0 ? 'btn-primary' : 'bg-neutral-200 text-neutral-500 cursor-not-allowed'}`}
-                        onClick={handleBookNow}
+                        onClick={() => handleTicketChange(-1)}
                         disabled={selectedTickets === 0}
+                        className="p-2 disabled:opacity-50"
                     >
-                      Book Now
+                      <Minus className="h-4 w-4" />
                     </button>
-
-                    <p className="mt-4 text-center text-xs text-neutral-500">
-                      By proceeding, you agree to our Terms of Service and Privacy Policy
-                    </p>
+                    <span className="px-4">{selectedTickets}</span>
+                    <button
+                        onClick={() => handleTicketChange(1)}
+                        disabled={selectedTickets === 10 || !selectedTicketType}
+                        className="p-2 disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
+
+                {selectedTickets > 0 && currentTicketType && (
+                    <div className="mb-6 bg-primary p-4 rounded-lg">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-neutral-600">{currentTicketType.name} × {selectedTickets}</span>
+                        <span className="font-medium text-text">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between mb-2">
+                        <span className="text-neutral-600">Service Fee</span>
+                        <span className="font-medium text-text">${(currentTicketType.price * selectedTickets * 0.15).toFixed(2)}</span>
+                      </div>
+                      <div className="border-t border-neutral-100 pt-2 mt-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">Total</span>
+                          <span className="font-bold">${(currentTicketType.price * selectedTickets * 1.15).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                )}
+
+                <button
+                    onClick={handleBookNow}
+                    disabled={selectedTickets === 0 || !selectedTicketType}
+                    className="w-full py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Book Now
+                </button>
               </div>
             </div>
           </div>

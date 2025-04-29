@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface AuthModalProps {
@@ -9,22 +9,37 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    phone: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login({
-      id: '1',
-      name: formData.name || 'John Doe',
-      email: formData.email
-    });
-    onClose();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      if (isLogin) {
+        // Login flow - call API through context
+        await login(formData.email, formData.password);
+      } else {
+        // Registration flow - call API through context
+        await register(formData.name, formData.email, formData.phone, formData.password);
+      }
+      // If successful, close the modal
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +47,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setError('');
   };
 
   return (
@@ -65,7 +85,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       <X className="h-5 w-5" />
                     </button>
 
-                    <h2 className="text-2xl font-bold text-text mb-2">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
                       {isLogin ? 'Welcome back!' : 'Create an account'}
                     </h2>
                     <p className="text-neutral-600 mb-6">
@@ -76,6 +96,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   </div>
 
                   <form onSubmit={handleSubmit} className="p-6">
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                          {error}
+                        </div>
+                    )}
+
                     {!isLogin && (
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-neutral-700 mb-2" htmlFor="name">
@@ -89,9 +115,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="input pl-10"
+                                className="input pl-10 w-full p-3 border border-gray-300 rounded-lg"
                                 placeholder="John Doe"
                                 required
+                            />
+                          </div>
+                        </div>
+                    )}
+
+                    {!isLogin && (
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-neutral-700 mb-2" htmlFor="phone">
+                            Phone Number
+                          </label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="input pl-10 w-full p-3 border border-gray-300 rounded-lg"
+                                placeholder="+1 (555) 123-4567"
                             />
                           </div>
                         </div>
@@ -109,7 +155,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            className="input pl-10"
+                            className="input pl-10 w-full p-3 border border-gray-300 rounded-lg"
                             placeholder="you@example.com"
                             required
                         />
@@ -128,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="input pl-10"
+                            className="input pl-10 w-full p-3 border border-gray-300 rounded-lg"
                             placeholder="••••••••"
                             required
                         />
@@ -137,10 +183,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
                     <button
                         type="submit"
-                        className="btn btn-primary w-full flex items-center justify-center"
+                        disabled={isLoading}
+                        className="btn btn-primary w-full flex items-center justify-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      {isLogin ? 'Sign In' : 'Create Account'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      {isLoading ? (
+                          <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </span>
+                      ) : (
+                          <>
+                            {isLogin ? 'Sign In' : 'Create Account'}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                      )}
                     </button>
 
                     <div className="mt-6 text-center">
@@ -148,8 +207,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         {isLogin ? "Don't have an account? " : "Already have an account? "}
                         <button
                             type="button"
-                            onClick={() => setIsLogin(!isLogin)}
-                            className="text-accent hover:text-accent/80 font-medium"
+                            onClick={toggleMode}
+                            className="text-blue-600 hover:text-blue-500 font-medium"
                         >
                           {isLogin ? 'Sign Up' : 'Sign In'}
                         </button>

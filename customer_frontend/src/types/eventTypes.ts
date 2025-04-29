@@ -18,31 +18,3 @@ export interface Ticket {
   purchasedAt: string; // Date in string format (ISO string)
 }
 
-export type EventType = {
-  id: string;          // A unique identifier for the event, corresponds to _id in MongoDB
-  title: string;
-  category: string;
-  date: string;        // Date in string format
-  venue: string;
-  location: string;
-  imageUrl: string;
-  description: string;
-  featured: boolean;
-  tags: string[];
-  availableTickets: number;
-};
-
-export type TicketType = {
-  id: string;          // A unique identifier for the ticket, corresponds to _id in MongoDB
-  name: string;
-  price: number;       // Ticket price
-  description: string;
-  available: number;   // Number of available tickets
-  maxPerOrder: number; // Max tickets per order
-};
-
-export type CategoryType = {
-  id: string;   // Unique identifier for the category
-  name: string;
-  icon: string; // Icon related to the category
-};
