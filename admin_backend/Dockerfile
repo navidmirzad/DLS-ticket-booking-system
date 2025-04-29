@@ -1,30 +1,20 @@
-# Build stage
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Production stage
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install MySQL client and other dependencies
-RUN apk add --no-cache mysql-client
+# Install mysql client and curl (for wait-for-it)
+RUN apk add --no-cache mysql-client curl
 
-# Copy built files from builder stage
-COPY --from=builder /app .
+# Copy project files
+COPY package*.json ./
+RUN npm install
+COPY . .
 
-# Expose the port the app runs on
+# Copy wait-for-it
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
 EXPOSE 3001
 
-# Start the application
-CMD ["node", "app.js"] 
+# Wait for MySQL and then start app
+CMD ["sh", "-c", "wait-for-it.sh mysql 3306 node app.js"]

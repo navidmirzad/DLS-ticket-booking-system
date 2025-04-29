@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, Search, User, Menu, X } from 'lucide-react';
+import { Ticket, Search, User, Menu, X, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import AuthModal from '../auth/AuthModal';
 
 interface HeaderProps {
   isScrolled: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
+  const { isAuthenticated, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
@@ -40,11 +44,13 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             }>
               Events
             </NavLink>
-            <NavLink to="/account" className={({ isActive }) => 
-              `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
-            }>
-              My Tickets
-            </NavLink>
+            {isAuthenticated && (
+              <NavLink to="/account" className={({ isActive }) => 
+                `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
+              }>
+                My Tickets
+              </NavLink>
+            )}
           </nav>
 
           {/* Header Actions */}
@@ -56,12 +62,29 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             >
               <Search className="h-5 w-5 text-text" />
             </button>
-            <Link to="/account" className="hidden md:flex items-center p-2 rounded-full hover:bg-secondary transition-all duration-300">
-              <User className="h-5 w-5 text-text" />
-            </Link>
-            <Link to="/events" className="hidden md:block btn btn-primary">
-              Find Events
-            </Link>
+
+            {isAuthenticated ? (
+              <div className="hidden md:flex items-center space-x-4">
+                <Link to="/account" className="flex items-center space-x-2 p-2 rounded-full hover:bg-secondary transition-all duration-300">
+                  <User className="h-5 w-5 text-text" />
+                  <span className="text-sm font-medium">{user?.name}</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="p-2 rounded-full hover:bg-secondary transition-all duration-300"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5 text-text" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="hidden md:block btn btn-primary"
+              >
+                Sign In
+              </button>
+            )}
             
             {/* Mobile Menu Button */}
             <button
@@ -136,26 +159,48 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
               >
                 Events
               </NavLink>
-              <NavLink
-                to="/account"
-                className={({ isActive }) => 
-                  `px-4 py-2 rounded-lg ${isActive ? 'bg-secondary text-text' : 'text-text hover:bg-secondary'}`
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
-                My Tickets
-              </NavLink>
-              <Link 
-                to="/events" 
-                className="btn btn-primary w-full justify-center"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Find Events
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <NavLink
+                    to="/account"
+                    className={({ isActive }) => 
+                      `px-4 py-2 rounded-lg ${isActive ? 'bg-secondary text-text' : 'text-text hover:bg-secondary'}`
+                    }
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Tickets
+                  </NavLink>
+                  <button 
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="px-4 py-2 rounded-lg text-text hover:bg-secondary flex items-center"
+                  >
+                    <LogOut className="h-5 w-5 mr-2" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => {
+                    setIsAuthModalOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="btn btn-primary w-full justify-center"
+                >
+                  Sign In
+                </button>
+              )}
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </header>
   );
 };
