@@ -11,9 +11,6 @@ const Navbar = () => {
           </div>
   
           <div className="space-x-3">
-            <button className="text-white px-4 py-2 rounded">
-              Login
-            </button>
           </div>
         </div>
       </nav>
