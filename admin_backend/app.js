@@ -17,13 +17,21 @@ dotenv.config();
 
 app.use(
   cors({
-    origin: [process.env.LOCAL_ENV, process.env.ADMIN_FRONTEND],
+    origin: [
+      process.env.LOCAL_ENV,
+      process.env.ADMIN_FRONTEND,
+      process.env.AUTH_ENV,
+    ],
   })
 );
 
 app.use(express.json());
 
-createDatabase();
+try {
+  createDatabase();
+} catch (error) {
+  console.error("Error creating database:", error);
+}
 
 app.get("/api/admin", (req, res) => {
   res.send({ data: "Hello from admin backend" });
