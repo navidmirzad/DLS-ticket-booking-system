@@ -8,7 +8,7 @@ import {
   updateEvent,
   deleteEvent,
 } from "./services/eventService.js";
-import { authenticate, authorizeAdmin } from "./middleware/auth.js";
+import { isAuthenticated } from "./middleware/auth.js";
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
 const app = express();
@@ -29,19 +29,17 @@ app.get("/api/admin", (req, res) => {
   res.send({ data: "Hello from admin backend" });
 });
 
-app.get("/api/admin/events", authenticate, authorizeAdmin, async (req, res) => {
+app.get("/api/admin/events", isAuthenticated, async (req, res) => {
   try {
     const events = await getEvents();
-    res.json({ data: events });
+    res.send({ data: events });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch events" });
+    res.status(500).send({ error: "Failed to fetch events" });
   }
 });
 
 app.get(
   "/api/admin/events/:id",
-  authenticate,
-  authorizeAdmin,
   async (req, res) => {
     try {
       const eventId = req.params.id;
@@ -59,8 +57,6 @@ app.get(
 
 app.post(
   "/api/admin/events",
-  authenticate,
-  authorizeAdmin,
   async (req, res) => {
     try {
       const event = req.body;
@@ -74,8 +70,6 @@ app.post(
 
 app.patch(
   "/api/admin/events/:id",
-  authenticate,
-  authorizeAdmin,
   async (req, res) => {
     try {
       const eventId = req.params.id;
@@ -90,8 +84,6 @@ app.patch(
 
 app.delete(
   "/api/admin/events/:id",
-  authenticate,
-  authorizeAdmin,
   async (req, res) => {
     try {
       const eventId = req.params.id;

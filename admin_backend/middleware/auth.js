@@ -1,26 +1,26 @@
 import axios from "axios";
 
-const authenticate = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token provided" });
+export const isAuthenticated = async (req, res, next) => {
+  if (!req.headers || !req.headers.authorization) {
+    return res.status(401).send({ 
+      message: "No authorization header found",
+      authUrl: process.env.AUTH_URL
+    });
+  }
 
   try {
-    const response = await axios.get(process.env.AUTH_URL, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.get(`${process.env.AUTH_URL}/api/auth/me`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
     });
-
-    req.user = response.data.user;
+    
+    req.user = response.data;
     next();
-  } catch (err) {
-    return res.status(401).json({ message: "Unauthorized" });
+  } catch (error) {
+    return res.status(401).send({ 
+      message: "Authentication failed", 
+      error: error.response.data
+    });
   }
-};
-
-const authorizeAdmin = (req, res, next) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ message: "Forbidden: Admins only" });
-  }
-  next();
-};
-
-export { authenticate, authorizeAdmin };
+}
