@@ -30,6 +30,10 @@ services:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${AUTH_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - ADMIN_FRONTEND=${ADMIN_FRONTEND}
+      - ADMIN_BACKEND=${ADMIN_BACKEND}
     depends_on:
       - mongodb
       - rabbitmq
@@ -48,6 +52,10 @@ services:
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_NAME=${MYSQL_DATABASE}
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - LOCAL_ENV=${LOCAL_ENV}
+      - AUTH_URL=${AUTH_URL}
+      - ADMIN_FRONTEND=${ADMIN_FRONTEND}
+      - ADMIN_BACKEND_PORT=${ADMIN_BACKEND_PORT}
     depends_on:
       mysql:
         condition: service_healthy
@@ -64,6 +72,7 @@ services:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - CUSTOMER_BACKEND_PORT=${CUSTOMER_BACKEND_PORT}
     depends_on:
       - mongodb
       - rabbitmq
@@ -84,7 +93,12 @@ services:
       - rabbitmq_network
 
   admin_frontend:
-    build: ./admin_frontend
+    build:
+      context: ./admin_frontend
+      args:
+        - VITE_LOGIN_URL=${VITE_LOGIN_URL}
+        - VITE_ADMIN_BACKEND_URL=${VITE_ADMIN_BACKEND_URL}
+        - VITE_VALIDATE_TOKEN_URL=${VITE_VALIDATE_TOKEN_URL}
     ports:
       - "8081:81"
     depends_on:
@@ -93,6 +107,9 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - VITE_LOGIN_URL=${VITE_LOGIN_URL}
+      - VITE_ADMIN_BACKEND_URL=${VITE_ADMIN_BACKEND_URL}
+      - VITE_VALIDATE_TOKEN_URL=${VITE_VALIDATE_TOKEN_URL}
     networks:
       - rabbitmq_network
 

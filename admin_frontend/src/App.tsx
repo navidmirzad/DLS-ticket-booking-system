@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Event } from "./types/Event";
 import { fetchEvents } from "./services/eventService";
-import { validateToken } from "./services/authService";
 import LoadingScreen from "./components/LoadingScreen";
 import EventList from "./components/EventList";
 import Navbar from "./components/Navbar";
 import { Routes, Route } from "react-router-dom"
+import { useAuth } from "./context/AuthContext";
 
 // pages
 import ViewEvent from "./pages/ViewEvent"
@@ -15,29 +15,26 @@ import Login from "./pages/Login"
 
 function App() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [jwtTokenValid, setJwtTokenValid] = useState<boolean>(false);
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    const init = async () => {
-      const valid = await validateToken();
-      if (valid) {
-        await fetchEvents()
-          .then(setEvents)
-          .catch((error) => {
-            console.error("Failed to fetch events:", error);
-          });
+    const loadEvents = async () => {
+      if (isAuthenticated) {
+        try {
+          const fetchedEvents = await fetchEvents();
+          setEvents(fetchedEvents);
+        } catch (error) {
+          console.error("Failed to fetch events:", error);
+        }
       }
-      setJwtTokenValid(valid);
-      setLoading(false);
     };
 
-    init();
-  }, []);
+    loadEvents();
+  }, [isAuthenticated]);
 
   if (loading) return <LoadingScreen />;
 
-  if (!jwtTokenValid) return <Login />;
+  if (!isAuthenticated) return <Login />;
 
   return (
     <div className="min-h-screen">

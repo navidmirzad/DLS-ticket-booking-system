@@ -8,11 +8,35 @@ export const seedMongo = async () => {
 
     const events = await Event.insertMany([
       {
-        title: "Sample Event",
+        title: "Sample Event 1",
         description: "This is a sample event.",
         location: "City A",
         date: new Date(),
         capacity: 100,
+        created_at: new Date(),
+      },
+      {
+        title: "Sample Event 2",
+        description: "This is a sample event.",
+        location: "City B",
+        date: new Date(),
+        capacity: 200,
+        created_at: new Date(),
+      },
+      {
+        title: "Sample Event 3",
+        description: "This is a sample event.",
+        location: "City C",
+        date: new Date(),
+        capacity: 100,
+        created_at: new Date(),
+      },
+      {
+        title: "Sample Event 4",
+        description: "This is a sample event.",
+        location: "City D",
+        date: new Date(),
+        capacity: 50,
         created_at: new Date(),
       },
     ]);

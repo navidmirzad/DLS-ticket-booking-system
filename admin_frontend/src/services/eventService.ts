@@ -1,24 +1,34 @@
 import { Event } from "../types/Event";
-import { fetchWithAuth } from "./api";
 
-const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL;
+const ADMIN_BACKEND_URL = "http://localhost:3001/api/admin";
 
 export const fetchEvents = async (): Promise<Event[]> => {
-  const response = await fetchWithAuth(`${ADMIN_BACKEND_URL}/events`);
+  const response = await fetch(`${ADMIN_BACKEND_URL}/events`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
   const data = await response.json();
   return data.data;
 };
 
 export const fetchEventById = async (id: string): Promise<Event> => {
-  const response = await fetchWithAuth(`${ADMIN_BACKEND_URL}/events/${id}`);
+  const response = await fetch(`${ADMIN_BACKEND_URL}/events/${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
   const data = await response.json();
   return data.data;
 };
 
 export const handleDelete = async (id: string) => {
   try {
-    const response = await fetchWithAuth(`${ADMIN_BACKEND_URL}/events/${id}`, {
+    const response = await fetch(`${ADMIN_BACKEND_URL}/events/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
 
     const data = await response.json();

@@ -8,11 +8,40 @@ import {
   CreditCard,
   User,
   Mail,
-  Phone
+  Phone,
+  Info
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getEventById } from '../services/api';  // Import from the correct API service
+import {
+  getEventById,
+  Event,
+  TicketType,
+  getTicketTypesForEvent
+} from '../services/api';
 import { formatShortDate, formatTime } from '../utils/dateUtils';
+
+// Safe formatting functions with fallbacks
+const safeFormatShortDate = (dateString: string | Date | undefined | null): string => {
+  if (!dateString) return "Date TBD";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Date TBD";
+    return formatShortDate(String(dateString));
+  } catch (e) {
+    return "Date TBD";
+  }
+};
+
+const safeFormatTime = (dateString: string | Date | undefined | null): string => {
+  if (!dateString) return "Time TBD";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Time TBD";
+    return formatTime(String(dateString));
+  } catch (e) {
+    return "Time TBD";
+  }
+};
 
 const BookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,9 +49,12 @@ const BookingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1', 10);
+  const ticketTypeId = searchParams.get('ticketType') || 'general';
 
-  // State for the event data, loading, and error handling
-  const [event, setEvent] = useState<any | null>(null);
+  // State for the event data, ticket types, loading, and error handling
+  const [event, setEvent] = useState<Event | null>(null);
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+  const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,23 +68,44 @@ const BookingPage: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Fetch event details from the API
+  // Fetch event details and ticket types from the API
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventData = async () => {
+      if (!id) return;
+
       try {
         setIsLoading(true);
-        const response = await getEventById(id);
-        setEvent(response);
+        console.log(`Fetching event with ID: ${id}`);
+
+        // Fetch event details
+        const eventData = await getEventById(id);
+        console.log('Fetched event data:', eventData);
+
+        // Fetch ticket types for this event
+        const ticketTypesData = await getTicketTypesForEvent(id);
+        console.log('Fetched ticket types:', ticketTypesData);
+
+        if (!eventData) {
+          throw new Error('Event not found');
+        }
+
+        setEvent(eventData);
+        setTicketTypes(ticketTypesData);
+
+        // Find the selected ticket type
+        const selectedType = ticketTypesData.find(type => type.id === ticketTypeId) || ticketTypesData[0];
+        setSelectedTicketType(selectedType);
+
       } catch (err) {
-        console.error('Error fetching event:', err);
+        console.error('Error fetching event data:', err);
         setError('Failed to load event data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchEvent();
-  }, [id]);
+    fetchEventData();
+  }, [id, ticketTypeId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -101,8 +154,15 @@ const BookingPage: React.FC = () => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Calculate subtotal, fees, and total
-      navigate('/checkout');
+      // Navigate to checkout with all the relevant information
+      navigate('/checkout', {
+        state: {
+          eventId: id,
+          selectedTicketType: selectedTicketType, // Pass the full ticket type object
+          ticketCount,
+          userInfo: formData
+        }
+      });
     }
   };
 
@@ -115,14 +175,15 @@ const BookingPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error || !event || !selectedTicketType) {
     return (
-        <div className="container-custom py-20 text-center">
+        <div className="container-custom py-20">
           <h1 className="text-3xl font-bold text-text mb-4">Event Not Found</h1>
-          <p className="text-text-secondary mb-8">{error}</p>
+          <p className="text-text-secondary mb-6">{error || "The event doesn't exist or has been removed."}</p>
+
           <button
               onClick={() => navigate('/events')}
-              className="btn btn-primary"
+              className="mt-6 btn btn-primary px-4 py-2 bg-accent text-white rounded-lg"
           >
             Browse Events
           </button>
@@ -130,11 +191,14 @@ const BookingPage: React.FC = () => {
     );
   }
 
-  // Calculate pricing
-  const ticketPrice = event?.price.min || 0;
+  // Calculate pricing based on the selected ticket type
+  const ticketPrice = selectedTicketType.price;
   const subtotal = ticketPrice * ticketCount;
   const serviceFee = subtotal * 0.15; // 15% service fee
   const total = subtotal + serviceFee;
+
+  // Default image if none is provided
+  const defaultImage = 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
 
   return (
       <div className="bg-primary py-12">
@@ -297,22 +361,22 @@ const BookingPage: React.FC = () => {
                   <div className="flex items-start mb-6">
                     <div
                         className="w-20 h-20 rounded-lg bg-cover bg-center flex-shrink-0 mr-4"
-                        style={{ backgroundImage: `url(${event.imageUrl})` }}
+                        style={{ backgroundImage: `url(${defaultImage})` }}
                     />
                     <div>
                       <h3 className="font-medium text-text mb-1">{event.title}</h3>
                       <div className="text-sm text-neutral-500 space-y-1">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                          <span>{formatShortDate(event.date)}</span>
+                          <span>{safeFormatShortDate(event.date)}</span>
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                          <span>{formatTime(event.date)}</span>
+                          <span>{safeFormatTime(event.date)}</span>
                         </div>
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                          <span>{event.venue}</span>
+                          <span>{event.location || 'Location TBD'}</span>
                         </div>
                       </div>
                     </div>
@@ -320,7 +384,7 @@ const BookingPage: React.FC = () => {
 
                   <div className="border-t border-neutral-100 pt-4 mb-4">
                     <div className="flex justify-between mb-2">
-                      <span className="text-neutral-600">General Admission × {ticketCount}</span>
+                      <span className="text-neutral-600">{selectedTicketType.name} × {ticketCount}</span>
                       <span className="font-medium text-text">${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between mb-2">

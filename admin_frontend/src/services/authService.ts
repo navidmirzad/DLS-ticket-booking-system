@@ -13,9 +13,9 @@ export const validateToken = async (): Promise<boolean> => {
       });
   
       if (response.ok) {
-        return true; // token is valid
+        return true;
       } else {
-        return false; // invalid or expired
+        return false; 
       }
     } catch (error) {
       console.error("Token validation failed:", error);

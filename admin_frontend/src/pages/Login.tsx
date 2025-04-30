@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -18,9 +20,14 @@ const Login = () => {
       });
 
       const { token } = response.data;
-      localStorage.setItem("token", token); 
+      const success = await login(token);
+      
+      if (success) {
       navigate("/"); 
-    } catch (err: any) {
+      } else {
+        setError("Authentication failed after login");
+      }
+    } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("Invalid email or password.");
     }

@@ -11,6 +11,10 @@ const Navbar = () => {
           </div>
   
           <div className="space-x-3">
+            <button onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}>Logout</button>
           </div>
         </div>
       </nav>
