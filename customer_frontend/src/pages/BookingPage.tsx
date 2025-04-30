@@ -158,7 +158,7 @@ const BookingPage: React.FC = () => {
       navigate('/checkout', {
         state: {
           eventId: id,
-          ticketTypeId: selectedTicketType?.id,
+          selectedTicketType: selectedTicketType, // Pass the full ticket type object
           ticketCount,
           userInfo: formData
         }

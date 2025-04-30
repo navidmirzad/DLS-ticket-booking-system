@@ -7,6 +7,14 @@ import { buyTicket, getEventById, TicketType } from '../services/api';
 interface LocationState {
   eventId: string;
   selectedTicketType?: TicketType;
+  ticketCount?: number;
+  userInfo?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    agreeToTerms: boolean;
+  };
 }
 
 const CheckoutPage: React.FC = () => {
