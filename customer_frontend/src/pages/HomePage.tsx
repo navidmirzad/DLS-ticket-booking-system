@@ -14,36 +14,22 @@ import {
 import EventCard from '../components/events/EventCard';
 import SearchBar from '../components/common/SearchBar';
 import AuthModal from '../components/auth/AuthModal';
-import { getEvents } from '../services/api';  // Import API function to fetch events
+import { getEvents, Event } from '../services/api';  // Import Event interface and API function
 
 const HomePage: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [featuredEvents, setFeaturedEvents] = useState([]);  // State to hold the featured events
+  const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);  // Use the Event interface
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const categories = [
-    { id: 'concert', name: 'Concerts', icon: <Music className="h-6 w-6" strokeWidth={1.5} /> },
-    { id: 'sports', name: 'Sports', icon: <Trophy className="h-6 w-6" strokeWidth={1.5} /> },
-    { id: 'theater', name: 'Theater', icon: <Theater className="h-6 w-6" strokeWidth={1.5} /> },
-    { id: 'conference', name: 'Conferences', icon: <Users className="h-6 w-6" strokeWidth={1.5} /> },
-    { id: 'food', name: 'Food & Drink', icon: <Utensils className="h-6 w-6" strokeWidth={1.5} /> }
-  ];
 
   // Fetch featured events when the component is mounted
   useEffect(() => {
     const fetchFeaturedEvents = async () => {
       try {
         setIsLoading(true);
-        const response = await getEvents();
-        console.log('Fetched events:', response);
-
-        // If response.data is an array, you can set it to featuredEvents
-        if (Array.isArray(response.data)) {
-          setFeaturedEvents(response.data);
-        } else {
-          setError('Failed to load featured events.');
-        }
+        const events = await getEvents(); // getEvents already returns Event[] directly
+        console.log('Fetched events:', events);
+        setFeaturedEvents(events);
       } catch (err) {
         console.error('Error fetching featured events:', err);
         setError('Failed to fetch featured events.');
@@ -99,18 +85,7 @@ const HomePage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
             >
-              {categories.map((category, index) => (
-                  <Link
-                      key={category.id}
-                      to={`/events?category=${category.id}`}
-                      className="bg-white rounded-xl p-4 text-center shadow-sm border border-neutral-100 hover:shadow-md hover:border-secondary transition-all duration-300"
-                  >
-                    <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-accent">
-                      {category.icon}
-                    </div>
-                    <h3 className="font-medium text-text">{category.name}</h3>
-                  </Link>
-              ))}
+              {/* Category icons could go here */}
             </motion.div>
           </div>
         </section>
@@ -144,6 +119,10 @@ const HomePage: React.FC = () => {
                     Try Again
                   </button>
                 </div>
+            ) : featuredEvents.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-xl text-text-secondary">No events available at the moment.</p>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {featuredEvents.map((event, index) => (
@@ -153,7 +132,7 @@ const HomePage: React.FC = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, delay: index * 0.1 }}
                       >
-                        <EventCard event={event} /> {/* Display event without pricing */}
+                        <EventCard event={event} />
                       </motion.div>
                   ))}
                 </div>
@@ -170,4 +149,3 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
-// Note: The above code assumes that the API response for events is an array of event objects.

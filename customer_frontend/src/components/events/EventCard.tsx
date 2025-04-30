@@ -1,27 +1,23 @@
+// EventCard.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
-import { EventType } from '../../types/eventTypes';
+import { Event } from '../../services/api';  // Importing Event model
 import { formatDate } from '../../utils/dateUtils';
 
 interface EventCardProps {
-  event: EventType;
+  event: Event;  // Use Event directly here
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
   return (
-      <Link to={`/events/${event.id}`} className="card group">
+      <Link to={`/events/${event._id}`} className="card group">
         <div className="relative overflow-hidden aspect-[16/9]">
           <img
-              src={event.imageUrl}
+              src="https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg"  // Placeholder image
               alt={event.title}
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute top-3 left-3">
-          <span className="bg-white px-3 py-1 rounded-full text-xs font-medium text-text">
-            {event.category}
-          </span>
-          </div>
         </div>
 
         <div className="p-5">
@@ -37,12 +33,11 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
             <div className="flex items-center text-neutral-500 text-sm">
               <MapPin className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              <span>{event.venue}, {event.location}</span>
+              <span>{event.location}</span>  {/* Displaying location */}
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            {/* Remove price as it's not part of the Event data */}
             <button className="btn btn-outline py-2 px-4">View Details</button>
           </div>
         </div>

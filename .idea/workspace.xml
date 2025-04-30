@@ -4,30 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="merge w. main">
-      <change afterPath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" afterDir="false" />
+    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="update wait-for-it.sh to use LF instead of CRLF">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/admin_backend/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/layout/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/layout/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/data/eventData.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/main.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/AccountPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/AccountPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/CheckoutPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/CheckoutPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mail_service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/mail_service/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +36,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="user-frontend" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -62,6 +53,10 @@
     &quot;accountId&quot;: &quot;41a2738e-6471-45cb-8a6a-10f4e6e0684a&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -76,7 +71,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "setup-admin-frontend",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/danie/IdeaProjects/SoftwareUdvikling/DLS/TicketBookingSystem/customer_frontend",
     "node.js.detected.package.eslint": "true",
@@ -87,7 +82,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.general",
-    "ts.external.directory.path": "C:\\Users\\danie\\IdeaProjects\\SoftwareUdvikling\\DLS\\TicketBookingSystem\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Users\\danie\\IdeaProjects\\DLS-ticket-booking-system\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -181,6 +176,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="merge w. main" />
-    <option name="LAST_COMMIT_MESSAGE" value="merge w. main" />
+    <MESSAGE value="update wait-for-it.sh to use LF instead of CRLF" />
+    <option name="LAST_COMMIT_MESSAGE" value="update wait-for-it.sh to use LF instead of CRLF" />
   </component>
 </project>
