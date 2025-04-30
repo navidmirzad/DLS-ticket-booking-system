@@ -56,7 +56,7 @@ export const getEvents = async (): Promise<Event[]> => {
     if (response.data && response.data.data && Array.isArray(response.data.data)) {
       return response.data.data;
     } else if (Array.isArray(response.data)) {
-  return response.data;
+      return response.data;
     } else {
       console.error('Error: Response data is not an array', response.data);
       throw new Error('Response data is not an array');
@@ -100,7 +100,7 @@ export const getTicketTypesForEvent = async (eventId: string): Promise<TicketTyp
     if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
       return response.data.data;
     } else if (Array.isArray(response.data)) {
-  return response.data;
+      return response.data;
     } else {
       // If API doesn't support ticket types yet, return dummy data for now
       return [
@@ -227,7 +227,7 @@ export const buyTicket = async (
 
 export const refundTicket = async (ticketId: string): Promise<void> => {
   try {
-  await api.delete(`/api/ticket/${ticketId}`);
+    await api.delete(`/api/ticket/${ticketId}`);
   } catch (error) {
     console.error('Error refunding ticket:', error);
     throw error;

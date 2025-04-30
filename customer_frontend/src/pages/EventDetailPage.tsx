@@ -140,9 +140,9 @@ const EventDetailPage: React.FC = () => {
 
           <div className="mt-6">
             <Link to="/events" className="btn btn-primary px-4 py-2 bg-accent text-white rounded-lg">
-            Browse Events
-          </Link>
-        </div>
+              Browse Events
+            </Link>
+          </div>
         </div>
     );
   }
@@ -251,28 +251,28 @@ const EventDetailPage: React.FC = () => {
 
                 <div className="space-y-4 mb-6">
                   {ticketTypes.map(ticket => (
-                          <div
-                              key={ticket.id}
+                      <div
+                          key={ticket.id}
                           className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition-all duration-300
                       ${ticket.id === selectedTicketType
                               ? 'border-accent bg-accent/5'
                               : 'border-neutral-100 hover:border-accent/30'}`}
                           onClick={() => handleTicketTypeChange(ticket.id)}
                       >
-                              <div>
+                        <div>
                           <h4 className="font-medium text-text">{ticket.name}</h4>
                           <p className="text-sm text-neutral-600">{ticket.description}</p>
                           <p className="text-xs text-neutral-500 mt-1">{ticket.available} tickets available</p>
                           <p className="text-sm font-semibold text-accent mt-1">${ticket.price.toFixed(2)}</p>
-                              </div>
+                        </div>
                         <div className="h-5 w-5 rounded-full border-2 flex items-center justify-center">
                           {ticket.id === selectedTicketType && (
                               <div className="h-3 w-3 rounded-full bg-accent"></div>
                           )}
-                            </div>
-                          </div>
-                      ))}
-                    </div>
+                        </div>
+                      </div>
+                  ))}
+                </div>
 
                 <div className="flex justify-between items-center mb-6">
                   <div className="font-medium text-text">Number of tickets</div>

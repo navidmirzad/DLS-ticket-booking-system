@@ -100,7 +100,7 @@ services:
         - VITE_ADMIN_BACKEND_URL=${VITE_ADMIN_BACKEND_URL}
         - VITE_VALIDATE_TOKEN_URL=${VITE_VALIDATE_TOKEN_URL}
     ports:
-      - "8081:81"
+        - "8081:81"
     depends_on:
       - auth_service
       - admin_backend

@@ -23,7 +23,7 @@ const Login = () => {
       const success = await login(token);
       
       if (success) {
-      navigate("/"); 
+        navigate("/");
       } else {
         setError("Authentication failed after login");
       }

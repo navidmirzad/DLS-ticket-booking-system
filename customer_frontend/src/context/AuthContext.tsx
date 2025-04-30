@@ -146,8 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout
       }}>
-      {children}
-    </AuthContext.Provider>
+        {children}
+      </AuthContext.Provider>
   );
 }
 

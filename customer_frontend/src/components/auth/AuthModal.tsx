@@ -34,7 +34,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         await register(formData.name, formData.email, formData.phone, formData.password);
       }
       // If successful, close the modal
-    onClose();
+      onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
@@ -196,8 +196,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     </span>
                       ) : (
                           <>
-                      {isLogin ? 'Sign In' : 'Create Account'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                            {isLogin ? 'Sign In' : 'Create Account'}
+                            <ArrowRight className="ml-2 h-4 w-4" />
                           </>
                       )}
                     </button>
