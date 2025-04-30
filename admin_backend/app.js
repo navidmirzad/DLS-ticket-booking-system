@@ -48,6 +48,7 @@ app.get("/api/admin/events", isAuthenticated, async (req, res) => {
 
 app.get(
   "/api/admin/events/:id",
+  isAuthenticated,
   async (req, res) => {
     try {
       const eventId = req.params.id;
@@ -65,6 +66,7 @@ app.get(
 
 app.post(
   "/api/admin/events",
+  isAuthenticated,
   async (req, res) => {
     try {
       const event = req.body;
@@ -78,6 +80,7 @@ app.post(
 
 app.patch(
   "/api/admin/events/:id",
+  isAuthenticated,
   async (req, res) => {
     try {
       const eventId = req.params.id;
@@ -92,6 +95,7 @@ app.patch(
 
 app.delete(
   "/api/admin/events/:id",
+  isAuthenticated,
   async (req, res) => {
     try {
       const eventId = req.params.id;

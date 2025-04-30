@@ -49,7 +49,7 @@ const EventForm = () => {
     try {
       const res = await fetch(`http://localhost:3001/api/admin/events${isEditMode ? `/${id}` : ""}`, {
         method: isEditMode ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
         body: JSON.stringify(formData),
       });
 
