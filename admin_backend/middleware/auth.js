@@ -4,7 +4,7 @@ dotenv.config();
 
 export const isAuthenticated = async (req, res, next) => {
   if (!req.headers || !req.headers.authorization) {
-    return res.status(401).send({ 
+    return res.status(401).send({
       message: "No authorization header found",
       authUrl: process.env.AUTH_URL
     });
@@ -16,12 +16,12 @@ export const isAuthenticated = async (req, res, next) => {
         Authorization: req.headers.authorization
       }
     });
-    
+
     req.user = response.data;
     next();
   } catch (error) {
-    return res.status(401).send({ 
-      message: "Authentication failed", 
+    return res.status(401).send({
+      message: "Authentication failed",
       error: error.response.data
     });
   }

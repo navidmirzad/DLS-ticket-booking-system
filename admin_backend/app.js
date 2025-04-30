@@ -107,7 +107,7 @@ app.delete(
   }
 );
 
-const PORT = process.env.ADMIN_BACKEND_PORT;
+const PORT = process.env.ADMIN_BACKEND_PORT || 3001;
 app.listen(PORT, () => {
   console.log("Admin backend is running on PORT: ", PORT);
 });
