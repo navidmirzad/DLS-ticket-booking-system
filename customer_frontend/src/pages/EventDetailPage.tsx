@@ -1,3 +1,5 @@
+// src/pages/EventDetailPage.tsx - With improved error handling for ticket data
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -7,22 +9,21 @@ import {
   Share,
   Heart,
   Info,
-  Tag,
   Plus,
-  Minus
+  Minus,
+  AlertTriangle
 } from 'lucide-react';
 import {
   getEventById,
   getTicketTypesForEvent,
-  Event,
+  SimpleEvent,
   TicketType
 } from '../services/api';
 import { formatDate, formatShortDate, formatTime } from '../utils/dateUtils';
 
-// Enhanced date validation function
+// Safe formatting functions with fallbacks
 const isValidDate = (dateString: string | Date | undefined | null): boolean => {
   if (!dateString) return false;
-
   try {
     const date = new Date(dateString);
     return !isNaN(date.getTime());
@@ -31,7 +32,6 @@ const isValidDate = (dateString: string | Date | undefined | null): boolean => {
   }
 };
 
-// Safe formatting functions with fallbacks
 const safeFormatDate = (dateString: string | Date | undefined | null): string => {
   return isValidDate(dateString) ? formatDate(String(dateString)) : "Date TBD";
 };
@@ -44,15 +44,18 @@ const safeFormatTime = (dateString: string | Date | undefined | null): string =>
   return isValidDate(dateString) ? formatTime(String(dateString)) : "Time TBD";
 };
 
+// Default image
+const DEFAULT_IMAGE = 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
+
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<SimpleEvent | null>(null);
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
   const [selectedTicketType, setSelectedTicketType] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [ticketDataError, setTicketDataError] = useState<string | null>(null);
   const [selectedTickets, setSelectedTickets] = useState(0);
 
   useEffect(() => {
@@ -66,34 +69,47 @@ const EventDetailPage: React.FC = () => {
         // Fetch event details
         const eventData = await getEventById(id);
         console.log('Fetched event data:', eventData);
+        setEvent(eventData);
 
-        // Fetch ticket types
+        try {
+          // Fetch ticket types - handle this separately so event can still display even if tickets fail
         const ticketTypesData = await getTicketTypesForEvent(id);
         console.log('Fetched ticket types:', ticketTypesData);
 
-        // Store debug info for troubleshooting
-        setDebugInfo({
-          event: eventData,
-          ticketTypes: ticketTypesData
-        });
-
-        // Validate response before setting state
-        if (!eventData) {
-          throw new Error('Event not found');
-        }
-
-        setEvent(eventData);
+          if (ticketTypesData && ticketTypesData.length > 0) {
         setTicketTypes(ticketTypesData);
 
-        // Set the default selected ticket type to the first one
-        if (ticketTypesData.length > 0) {
-          setSelectedTicketType(ticketTypesData[0].id);
+            // Verify the ticket data has all required fields
+            const hasValidTicketData = ticketTypesData.some(ticket =>
+                ticket.id &&
+                ticket.name &&
+                typeof ticket.price === 'number' &&
+                !isNaN(ticket.price)
+            );
+
+            if (!hasValidTicketData) {
+              console.warn('Invalid ticket data structure received');
+              setTicketDataError('Unable to load ticket information correctly');
+            } else {
+              // Set the default selected ticket type to the first valid one
+              const firstValidTicket = ticketTypesData.find(t =>
+                  t.id && typeof t.price === 'number' && !isNaN(t.price)
+              );
+              if (firstValidTicket) {
+                setSelectedTicketType(firstValidTicket.id);
+              }
+            }
+          } else {
+            setTicketDataError('No ticket information available');
+          }
+        } catch (ticketErr) {
+          console.error('Error fetching ticket types:', ticketErr);
+          setTicketDataError('Failed to load ticket information');
         }
 
       } catch (err) {
         setError('Failed to fetch event details');
         console.error('Error fetching event:', err);
-        setDebugInfo(err);
       } finally {
         setIsLoading(false);
       }
@@ -114,7 +130,7 @@ const EventDetailPage: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    if (selectedTickets > 0 && event) {
+    if (selectedTickets > 0 && event && selectedTicketType) {
       navigate(`/booking/${event._id}?tickets=${selectedTickets}&ticketType=${selectedTicketType}`);
     }
   };
@@ -148,17 +164,17 @@ const EventDetailPage: React.FC = () => {
   }
 
   // Default image if none is provided in the API response
-  const defaultImage = 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
+  const eventImage = event.image || DEFAULT_IMAGE;
 
   // Get the currently selected ticket type object
-  const currentTicketType = ticketTypes.find(ticket => ticket.id === selectedTicketType) || ticketTypes[0];
+  const currentTicketType = ticketTypes.find(ticket => ticket.id === selectedTicketType);
 
   return (
       <div className="bg-primary">
         {/* Hero Section */}
         <div
             className="relative bg-cover bg-center h-96 md:h-[500px]"
-            style={{ backgroundImage: `url(${defaultImage})` }}
+            style={{ backgroundImage: `url(${eventImage})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <div className="container-custom relative z-10 h-full flex flex-col justify-end pb-12">
@@ -249,8 +265,25 @@ const EventDetailPage: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
                 <h2 className="text-xl font-bold text-text mb-6">Get Tickets</h2>
 
+                {ticketDataError ? (
+                    <div className="p-4 bg-error/10 rounded-lg mb-6">
+                      <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-error mr-2" />
+                        <div>
+                          <p className="font-medium text-error">Ticket Information Error</p>
+                          <p className="text-sm text-neutral-700">{ticketDataError}</p>
+                          <p className="text-sm text-neutral-700 mt-2">
+                            Please try refreshing the page or contact customer support.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                ) : (
+                    <>
+                      {/* Ticket type selection */}
                 <div className="space-y-4 mb-6">
                   {ticketTypes.map(ticket => (
+                            ticket && ticket.id && ticket.price !== undefined ? (
                       <div
                           key={ticket.id}
                           className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition-all duration-300
@@ -260,10 +293,10 @@ const EventDetailPage: React.FC = () => {
                           onClick={() => handleTicketTypeChange(ticket.id)}
                       >
                         <div>
-                          <h4 className="font-medium text-text">{ticket.name}</h4>
-                          <p className="text-sm text-neutral-600">{ticket.description}</p>
-                          <p className="text-xs text-neutral-500 mt-1">{ticket.available} tickets available</p>
-                          <p className="text-sm font-semibold text-accent mt-1">${ticket.price.toFixed(2)}</p>
+                                    <h4 className="font-medium text-text">{ticket.name || 'Standard Ticket'}</h4>
+                                    <p className="text-sm text-neutral-600">{ticket.description || 'Standard admission'}</p>
+                                    <p className="text-xs text-neutral-500 mt-1">{ticket.available || 'Limited'} tickets available</p>
+                                    <p className="text-sm font-semibold text-accent mt-1">${typeof ticket.price === 'number' ? ticket.price.toFixed(2) : '0.00'}</p>
                         </div>
                         <div className="h-5 w-5 rounded-full border-2 flex items-center justify-center">
                           {ticket.id === selectedTicketType && (
@@ -271,9 +304,11 @@ const EventDetailPage: React.FC = () => {
                           )}
                         </div>
                       </div>
+                            ) : null
                   ))}
                 </div>
 
+                      {/* Ticket quantity selection */}
                 <div className="flex justify-between items-center mb-6">
                   <div className="font-medium text-text">Number of tickets</div>
                   <div className="flex items-center border border-neutral-200 rounded-lg">
@@ -295,10 +330,11 @@ const EventDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                {selectedTickets > 0 && currentTicketType && (
+                      {/* Price calculation */}
+                      {selectedTickets > 0 && currentTicketType && typeof currentTicketType.price === 'number' && (
                     <div className="mb-6 bg-primary p-4 rounded-lg">
                       <div className="flex justify-between mb-2">
-                        <span className="text-neutral-600">{currentTicketType.name} × {selectedTickets}</span>
+                              <span className="text-neutral-600">{currentTicketType.name || 'Standard Ticket'} × {selectedTickets}</span>
                         <span className="font-medium text-text">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between mb-2">
@@ -314,6 +350,7 @@ const EventDetailPage: React.FC = () => {
                     </div>
                 )}
 
+                      {/* Book button */}
                 <button
                     onClick={handleBookNow}
                     disabled={selectedTickets === 0 || !selectedTicketType}
@@ -321,6 +358,8 @@ const EventDetailPage: React.FC = () => {
                 >
                   Book Now
                 </button>
+                    </>
+                )}
               </div>
             </div>
           </div>

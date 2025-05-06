@@ -1,13 +1,14 @@
-import Event from "../models/mongo/Event.js";
+import { Event, EventDescription } from "../models/mongo/index.js";
 
 export const getEvents = async () => {
-    return await Event.find();
+    // Populate the event_description field to get the full event data
+    return await Event.find().populate('event_description');
 }
 
 export const getEventByID = async (eventId) => {
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId).populate('event_description');
     if(!event) {
-        throw new Error("Ticket not found")
+        throw new Error("Event not found");
     }
     return event;
 }

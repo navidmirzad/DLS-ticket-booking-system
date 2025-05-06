@@ -1,12 +1,12 @@
-// EventCard.tsx
+// src/components/events/EventCard.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
-import { Event } from '../../services/api';  // Importing Event model
+import { SimpleEvent } from '../../services/api';
 import { formatDate } from '../../utils/dateUtils';
 
 interface EventCardProps {
-  event: Event;  // Use Event directly here
+    event: SimpleEvent;
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
@@ -33,7 +33,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
             <div className="flex items-center text-neutral-500 text-sm">
               <MapPin className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              <span>{event.location}</span>  {/* Displaying location */}
+                        <span>{event.location}</span>
             </div>
           </div>
 

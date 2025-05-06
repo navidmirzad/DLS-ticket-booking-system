@@ -47,9 +47,9 @@ const seedAdminUser = async () => {
       await adminUser.save();
       console.log("Admin user created successfully");
       console.log("Email: admin@example.com");
-      console.log("Password: Admin123!");
+      console.log("Password: password123");
     } else {
-      console.log("Admin user already exists");
+      console.log("Admin user already exists, skipping create");
     }
   } catch (error) {
     console.error("Error seeding admin user:", error);
