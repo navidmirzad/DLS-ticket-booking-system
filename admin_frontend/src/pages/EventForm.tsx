@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import { fetchEventById } from "../services/eventService";
 
 type EventFormData = {
-  title: string;
+  name: string;
   description: string;
   date: string;
   location: string;
+  image: string;
   capacity: number; // Added capacity field
 };
 
@@ -15,10 +16,11 @@ const EventForm = () => {
   const isEditMode = Boolean(id);
 
   const [formData, setFormData] = useState<EventFormData>({
-    title: "",
+    name: "",
     description: "",
     date: "",
     location: "",
+    image: "",
     capacity: 0, // Initialize capacity
   });
 
@@ -29,10 +31,11 @@ const EventForm = () => {
     fetchEventById(id)
       .then((event) => {
         setFormData({
-          title: event.title,
+          name: event.name,
           description: event.description,
-          date: new Date(event.date).toISOString().split("T")[0],
+          date: new Date(event.date).toISOString().slice(0, 16),
           location: event.location,
+          image: event.image || "",
           capacity: event.capacity, // Populate capacity
         });
       })
@@ -53,7 +56,10 @@ const EventForm = () => {
     try {
       const res = await fetch(`http://localhost:3001/api/admin/events${isEditMode ? `/${id}` : ""}`, {
         method: isEditMode ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` 
+        },
         body: JSON.stringify(formData),
       });
 
@@ -61,7 +67,7 @@ const EventForm = () => {
         const data = await res.json();
         setStatus(isEditMode ? "Event updated!" : `Event created! ID: ${data.data}`);
         if (!isEditMode) {
-          setFormData({ title: "", description: "", date: "", location: "", capacity: 0 });
+          setFormData({ name: "", description: "", date: "", location: "", image: "" });
         }
       } else {
         setStatus("Failed to submit event.");
@@ -78,6 +84,63 @@ const EventForm = () => {
         {isEditMode ? "Edit Event" : "Create Event"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Event Image URL</label>
+          <input
+            type="url"
+            name="image"
+            placeholder="https://example.com/image.jpg"
+            value={formData.image}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+          {formData.image && (
+            <img
+              src={formData.image}
+              alt="Event preview"
+              className="mt-2 w-full h-48 object-cover rounded"
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                img.style.display = 'none';
+              }}
+            />
+          )}
+        </div>
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="datetime-local"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
         <input type="text" name="title" placeholder="Title" value={formData.title} onChange={handleChange} className="w-full p-2 border rounded" required />
         <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded" required />
         <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" required />
@@ -87,7 +150,11 @@ const EventForm = () => {
           {isEditMode ? "Update" : "Submit"}
         </button>
       </form>
-      <h1 style={{ marginTop: "1rem" }}>{status && <span>{status}</span>}</h1>
+      {status && (
+        <div className="mt-4 p-2 rounded text-center" style={{ backgroundColor: status.includes("Failed") ? "#fee2e2" : "#dcfce7" }}>
+          {status}
+        </div>
+      )}
     </div>
   );
 };

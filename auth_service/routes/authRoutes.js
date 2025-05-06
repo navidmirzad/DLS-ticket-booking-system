@@ -8,7 +8,7 @@ router.post("/register", register);
 router.post("/login", login);
 
 router.get("/me", protect, (req, res) => {
-  res.json({
+  res.send({
     user: req.user,
   });
 });
