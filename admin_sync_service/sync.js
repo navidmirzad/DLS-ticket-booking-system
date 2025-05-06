@@ -1,28 +1,39 @@
-import mysql from "mysql2/promise";
-import { publishEvent } from "./rabbitmq.js";
+import { getMySQLConnection } from "./mysql.js";
 
-const getMySQLConnection = async () => {
-  return await mysql.createConnection({
-    host: process.env.MYSQL_HOST,
-    port: process.env.MYSQL_PORT,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE,
-  });
-};
+export const syncToMySQL = async (event) => {
+  const connection = getMySQLConnection();
 
-export const syncEventsFromMySQL = async () => {
-  const connection = await getMySQLConnection();
-  const [events] = await connection.query("SELECT * FROM events");
-
-  for (const event of events) {
-    console.log("Publishing event to RabbitMQ:", event);
-
-    await publishEvent({
-      type: "EventCreated",
-      payload: event,
-    });
+  try {
+    if (event.type === "EventCreated") {
+      await connection.execute(
+        "INSERT INTO events (id, title, description, location, date, capacity) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          event.payload.id,
+          event.payload.title,
+          event.payload.description,
+          event.payload.location,
+          event.payload.date,
+          event.payload.capacity,
+        ]
+      );
+    } else if (event.type === "EventUpdated") {
+      await connection.execute(
+        "UPDATE events SET title = ?, description = ?, location = ?, date = ?, capacity = ? WHERE id = ?",
+        [
+          event.payload.title,
+          event.payload.description,
+          event.payload.location,
+          event.payload.date,
+          event.payload.capacity,
+          event.payload.id,
+        ]
+      );
+    } else if (event.type === "EventDeleted") {
+      await connection.execute("DELETE FROM events WHERE id = ?", [
+        event.payload.id,
+      ]);
+    }
+  } catch (error) {
+    console.error("Error syncing to MySQL:", error);
   }
-
-  console.log("Events synced from MySQL to RabbitMQ ✅");
 };

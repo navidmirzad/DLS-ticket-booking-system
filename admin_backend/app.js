@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import dotenv from "dotenv";
 import express from "express";
+import { connectRabbit } from "./util/rabbitmq.js";
 import {
   getEvents,
   getEvent,
@@ -28,9 +29,14 @@ app.use(
 app.use(express.json());
 
 try {
-  createDatabase();
+  await connectRabbit(); // Connect to RabbitMQ
+  console.log("RabbitMQ connected ✅");
+
+  await createDatabase(); // Initialize the database
+  console.log("Database initialized ✅");
 } catch (error) {
-  console.error("Error creating database:", error);
+  console.error("Error initializing services:", error);
+  process.exit(1); // Exit if initialization fails
 }
 
 app.get("/api/admin", (req, res) => {
@@ -46,66 +52,50 @@ app.get("/api/admin/events", isAuthenticated, async (req, res) => {
   }
 });
 
-app.get(
-  "/api/admin/events/:id",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      const event = await getEvent(eventId);
+app.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const event = await getEvent(eventId);
 
-      if (!event) {
-        return res.status(404).json({ error: "Event not found" });
-      }
-      res.status(200).json({ data: event });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch event" });
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
     }
+    res.status(200).json({ data: event });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch event" });
   }
-);
+});
 
-app.post(
-  "/api/admin/events",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const event = req.body;
-      const newEvent = await createEvent(event);
-      res.json({ data: newEvent });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create event" });
-    }
+app.post("/api/admin/events", isAuthenticated, async (req, res) => {
+  try {
+    const event = req.body;
+    const newEvent = await createEvent(event);
+    res.json({ data: newEvent });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create event" });
   }
-);
+});
 
-app.patch(
-  "/api/admin/events/:id",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      const event = req.body;
-      const updatedEvent = await updateEvent(eventId, event);
-      res.json({ data: updatedEvent });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update event" });
-    }
+app.patch("/api/admin/events/:id", isAuthenticated, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const event = req.body;
+    const updatedEvent = await updateEvent(eventId, event);
+    res.json({ data: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update event" });
   }
-);
+});
 
-app.delete(
-  "/api/admin/events/:id",
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      await deleteEvent(eventId);
-      res.json({ message: "Event deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete event" });
-    }
+app.delete("/api/admin/events/:id", isAuthenticated, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    await deleteEvent(eventId);
+    res.json({ message: "Event deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete event" });
   }
-);
+});
 
 const PORT = process.env.ADMIN_BACKEND_PORT || 3001;
 app.listen(PORT, () => {

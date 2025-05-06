@@ -7,6 +7,7 @@ type EventFormData = {
   description: string;
   date: string;
   location: string;
+  capacity: number; // Added capacity field
 };
 
 const EventForm = () => {
@@ -18,6 +19,7 @@ const EventForm = () => {
     description: "",
     date: "",
     location: "",
+    capacity: 0, // Initialize capacity
   });
 
   const [status, setStatus] = useState<string | null>(null);
@@ -31,15 +33,17 @@ const EventForm = () => {
           description: event.description,
           date: new Date(event.date).toISOString().split("T")[0],
           location: event.location,
+          capacity: event.capacity, // Populate capacity
         });
       })
       .catch(() => setStatus("Failed to load event"));
   }, [id]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: name === "capacity" ? parseInt(value, 10) || 0 : value, // Handle capacity as a number
     }));
   };
 
@@ -57,7 +61,7 @@ const EventForm = () => {
         const data = await res.json();
         setStatus(isEditMode ? "Event updated!" : `Event created! ID: ${data.data}`);
         if (!isEditMode) {
-          setFormData({ title: "", description: "", date: "", location: "" });
+          setFormData({ title: "", description: "", date: "", location: "", capacity: 0 });
         }
       } else {
         setStatus("Failed to submit event.");
@@ -78,6 +82,7 @@ const EventForm = () => {
         <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded" required />
         <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" required />
         <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="w-full p-2 border rounded" required /> {/* Added capacity field */}
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
           {isEditMode ? "Update" : "Submit"}
         </button>
