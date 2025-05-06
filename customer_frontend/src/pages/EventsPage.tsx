@@ -1,17 +1,16 @@
-// EventsPage.tsx
+// src/pages/EventsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Event } from '../services/api';  // Import Event model
+import { SimpleEvent, getEvents } from '../services/api';
 import EventCard from '../components/events/EventCard';
-import { getEvents } from '../services/api';
 
 const EventsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
 
-  const [events, setEvents] = useState<Event[]>([]);  // Store events fetched from the API
+  const [events, setEvents] = useState<SimpleEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,13 +18,13 @@ const EventsPage: React.FC = () => {
     const fetchEvents = async () => {
       try {
         setIsLoading(true);
-        const response = await getEvents();  // Fetch the events
-        setEvents(response);  // Set the events if fetched successfully
+        const eventsData = await getEvents();
+        setEvents(eventsData);
       } catch (err) {
         setError('Failed to fetch events');
         console.error('Error fetching events:', err);
       } finally {
-        setIsLoading(false);  // Set loading state to false when done
+        setIsLoading(false);
       }
     };
 
@@ -72,16 +71,33 @@ const EventsPage: React.FC = () => {
             </form>
           </div>
 
-          {/* Loading or Error State */}
-          {isLoading && <div>Loading...</div>}
-          {error && <div>{error}</div>}
+          {/* Loading State */}
+          {isLoading && (
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                <p className="text-text-secondary">Loading events...</p>
+              </div>
+          )}
+
+          {/* Error State */}
+          {!isLoading && error && (
+              <div className="text-center py-16">
+                <p className="text-2xl font-medium text-error mb-4">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="btn btn-primary"
+                >
+                  Try Again
+                </button>
+              </div>
+          )}
 
           {/* Display Events */}
           {!isLoading && !error && events.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events.map((event, index) => (
                     <motion.div
-                        key={event._id}  // Use _id as the key
+                        key={event._id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -92,11 +108,11 @@ const EventsPage: React.FC = () => {
               </div>
           )}
 
-          {/* If no events found */}
+          {/* No Events Found */}
           {!isLoading && !error && events.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-2xl font-medium text-text mb-4">No events found</p>
-                <p className="text-neutral-600 mb-6">Try adjusting your search criteria or browse all events</p>
+                <p className="text-neutral-600 mb-6">Try adjusting your search criteria or check back later</p>
               </div>
           )}
         </div>
