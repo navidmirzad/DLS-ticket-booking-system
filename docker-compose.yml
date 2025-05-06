@@ -147,6 +147,21 @@ services:
     networks:
       - rabbitmq_network
 
+  customer_sync_service:
+    build: ./customer_sync_service
+    ports: 
+      - "3005:3005"
+    depends_on:
+      - mysql
+      - mongodb
+      - rabbitmq
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${MONGODB_URL_CUSTOMER}/${CUSTOMER_DB}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    networks:
+      - rabbitmq_network
+
   mysql:
     image: mysql:8.0
     ports:
