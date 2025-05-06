@@ -19,7 +19,7 @@ const router = express.Router();
  *     Event:
  *       type: object
  *       properties:
- *         name:
+ *         title:
  *           type: string
  *         image:
  *           type: string
@@ -129,12 +129,12 @@ router.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
  *           schema:
  *             type: object
  *             required:
- *               - name
+ *               - title
  *               - description
  *               - date
  *               - location
  *             properties:
- *               name:
+ *               title:
  *                 type: string
  *               image:
  *                 type: string
@@ -194,7 +194,7 @@ router.post("/api/admin/events", isAuthenticated, async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               title:
  *                 type: string
  *               image:
  *                 type: string

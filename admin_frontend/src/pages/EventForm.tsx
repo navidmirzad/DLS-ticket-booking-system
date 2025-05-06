@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchEventById } from "../services/eventService";
 
 type EventFormData = {
-  name: string;
+  title: string;
   description: string;
   date: string;
   location: string;
@@ -16,7 +16,7 @@ const EventForm = () => {
   const isEditMode = Boolean(id);
 
   const [formData, setFormData] = useState<EventFormData>({
-    name: "",
+    title: "",
     description: "",
     date: "",
     location: "",
@@ -31,7 +31,7 @@ const EventForm = () => {
     fetchEventById(id)
       .then((event) => {
         setFormData({
-          name: event.name,
+          title: event.title,
           description: event.description,
           date: new Date(event.date).toISOString().slice(0, 16),
           location: event.location,
@@ -67,7 +67,7 @@ const EventForm = () => {
         const data = await res.json();
         setStatus(isEditMode ? "Event updated!" : `Event created! ID: ${data.data}`);
         if (!isEditMode) {
-          setFormData({ name: "", description: "", date: "", location: "", image: "" });
+          setFormData({ title: "", description: "", date: "", location: "", image: "", capacity: 0 });
         }
       } else {
         setStatus("Failed to submit event.");
@@ -108,9 +108,9 @@ const EventForm = () => {
         </div>
         <input
           type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
+          name="title"
+          placeholder="Title"
+          value={formData.title}
           onChange={handleChange}
           className="w-full p-2 border rounded"
           required
@@ -140,11 +140,7 @@ const EventForm = () => {
           className="w-full p-2 border rounded"
           required
         />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
-        <input type="text" name="title" placeholder="Title" value={formData.title} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded" required />
+      
         <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="w-full p-2 border rounded" required /> {/* Added capacity field */}
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
           {isEditMode ? "Update" : "Submit"}

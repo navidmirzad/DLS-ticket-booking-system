@@ -21,7 +21,7 @@ const ViewEvent = () => {
       {event?.image && (
         <img
           src={event.image}
-          alt={event.name}
+          alt={event.title}
           className="w-full h-64 object-cover rounded-lg mb-4"
           onError={(e) => {
             const img = e.target as HTMLImageElement;
@@ -29,7 +29,7 @@ const ViewEvent = () => {
           }}
         />
       )}
-      <h2 className="text-2xl font-bold mb-4">{event?.name}</h2>
+      <h2 className="text-2xl font-bold mb-4">{event?.title}</h2>
       <p className="mb-4 text-gray-700">{event?.description}</p>
       <div className="space-y-2">
         <p className="text-gray-600">

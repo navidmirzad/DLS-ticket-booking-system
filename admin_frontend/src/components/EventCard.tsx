@@ -10,8 +10,8 @@ const EventCard = ({ event }: Props) => {
 
   return (
     <div className="bg-gray-500 rounded-2xl p-4">
-      <img src={event.image || "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg"} alt={event.name} className="w-full h-40 object-cover rounded-md mb-4" />
-      <h2 className="text-xl font-semibold mb-2">{event.name}</h2>
+      <img src={event.image || "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg"} alt={event.title} className="w-full h-40 object-cover rounded-md mb-4" />
+      <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
       <p className="text-gray-800">
         <span className="font-medium">Date & Time:</span> {new Date(event.date).toLocaleString()}
       </p>
