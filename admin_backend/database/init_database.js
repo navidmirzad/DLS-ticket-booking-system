@@ -16,7 +16,7 @@ async function createDatabase() {
     await connection.query(`
       CREATE TABLE IF NOT EXISTS EVENT_DESCRIPTION (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255),
+        title VARCHAR(255),
         image VARCHAR(255),
         date DATE,
         description TEXT,
