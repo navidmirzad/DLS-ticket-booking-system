@@ -1,3 +1,4 @@
+// ticketController.js
 import { getTicketByID as getTicketByIDService, getTicketsByUserID as getTicketsByUserIDService, createTicket, deleteTicket } from "../services/ticketService.js";
 
 export const getTicketByID = async (req, res) => {
@@ -23,7 +24,7 @@ export const getTicketByID = async (req, res) => {
 
 export const getTicketsByUserID = async (req, res) => {
     try {
-        const userId = parseInt(req.params.userId);
+        const userId = req.params.userId;
         const tickets = await getTicketsByUserIDService(userId);
 
         res.send({ data: tickets });
@@ -32,22 +33,17 @@ export const getTicketsByUserID = async (req, res) => {
     }
 }
 
-
-export const buyTicket = async (req, res) => {
+export const buyTickets = async (req, res) => {
     try {
-        const { eventId, userId, email } = req.body;
+        const { eventId, userId = "guest", email, ticketsBought } = req.body;
 
-        if(!eventId || !userId || !email) {
-            return res.status(400).send({ error: "Missing fields" });
-        }
-
-        const ticket = await createTicket(eventId, userId, email);
-
-        res.send({ data: ticket });
-    } catch(err) {
-        res.status(500).send({ error: err.message });
+        const result = await createTicket(eventId, userId, email, ticketsBought);
+        res.status(201).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
     }
-}
+};
 
 export const refundTicket = async (req, res) => {
     try {

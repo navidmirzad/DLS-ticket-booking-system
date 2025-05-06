@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
-import { buyTicket, getEventById, TicketType } from '../services/api';
+import { buyTicket, getEventById, TicketType, SimpleEvent } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface LocationState {
   eventId: string;
   selectedTicketType?: TicketType;
   ticketCount?: number;
   userInfo?: {
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     phone: string;
     agreeToTerms: boolean;
@@ -20,18 +20,22 @@ interface LocationState {
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { eventId, selectedTicketType } = (location.state as LocationState) || {};
+  const { user } = useAuth();
+  const { eventId, selectedTicketType, ticketCount = 1, userInfo } =
+  (location.state as LocationState) || {};
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [eventName, setEventName] = useState<string>('');
+  const [event, setEvent] = useState<SimpleEvent | null>(null);
+
+  // Form state
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
   const [zipCode, setZipCode] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(userInfo?.email || '');
 
   // Get event details
   useEffect(() => {
@@ -42,8 +46,8 @@ const CheckoutPage: React.FC = () => {
       }
 
       try {
-        const event = await getEventById(eventId);
-        setEventName(event.title);
+        const eventData = await getEventById(eventId);
+        setEvent(eventData);
       } catch (err) {
         console.error('Error fetching event details:', err);
         setError('Could not load event details');
@@ -77,21 +81,22 @@ const CheckoutPage: React.FC = () => {
     setError(null);
 
     try {
-      // In a real app, you'd likely get the userId from auth context or state
-      const userId = 1; // Placeholder - would come from authentication
+      const userId = user?.id || 'guest';
 
-      // Call the API to buy the ticket
+      // FIXED: Convert ticket type to lowercase to match backend expectations
+      // Backend expects "vip", "standard", etc. as ticketId
+      const ticketTypeId = selectedTicketType.ticket_type.toLowerCase();
+
       await buyTicket(
           eventId,
           userId,
           email,
-          selectedTicketType.id
+          [{ ticketId: ticketTypeId, quantity: ticketCount }]
       );
 
       setIsProcessing(false);
       setIsComplete(true);
 
-      // Redirect to account page after a delay
       setTimeout(() => {
         navigate('/account');
       }, 3000);
@@ -115,7 +120,9 @@ const CheckoutPage: React.FC = () => {
               <CheckCircle className="h-16 w-16 text-success" strokeWidth={1.5} />
             </div>
             <h1 className="text-2xl font-bold text-text mb-2">Booking Confirmed!</h1>
-            <p className="text-lg font-medium text-text-secondary mb-1">{eventName}</p>
+            <p className="text-lg font-medium text-text-secondary mb-1">
+              {event?.title}
+            </p>
             <p className="text-neutral-600 mb-6">
               Your booking has been successfully completed. We've sent a confirmation email with all the details.
             </p>
@@ -150,7 +157,7 @@ const CheckoutPage: React.FC = () => {
                 </motion.div>
             )}
 
-            {selectedTicketType && (
+            {selectedTicketType && event && (
                 <motion.div
                     className="bg-secondary/20 rounded-lg p-4 mb-6"
                     initial={{ opacity: 0, y: 20 }}
@@ -160,10 +167,14 @@ const CheckoutPage: React.FC = () => {
                   <h2 className="text-lg font-medium text-text mb-2">Order Summary</h2>
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-medium">{eventName}</p>
-                      <p className="text-sm text-neutral-600">{selectedTicketType.name}</p>
+                      <p className="font-medium">{event.title}</p>
+                      <p className="text-sm text-neutral-600">
+                        {selectedTicketType.name} × {ticketCount}
+                      </p>
                     </div>
-                    <p className="font-bold text-lg">${selectedTicketType.price.toFixed(2)}</p>
+                    <p className="font-bold text-lg">
+                      ${(selectedTicketType.price * (ticketCount || 1)).toFixed(2)}
+                    </p>
                   </div>
                 </motion.div>
             )}
@@ -176,7 +187,7 @@ const CheckoutPage: React.FC = () => {
             >
               <div className="p-6 border-b border-neutral-100">
                 <h2 className="text-xl font-bold text-text">Payment Information</h2>
-                <p className="text-neutral-500 text-sm">Enter your contact and payment details securely</p>
+                <p className="text-neutral-500 text-sm">Enter your payment details securely</p>
               </div>
 
               <form onSubmit={handleSubmit} className="p-6">
@@ -284,7 +295,7 @@ const CheckoutPage: React.FC = () => {
                           Processing...
                         </div>
                     ) : (
-                        `Complete Payment ${selectedTicketType ? `($${selectedTicketType.price.toFixed(2)})` : ''}`
+                        `Complete Payment ${selectedTicketType ? `($${(selectedTicketType.price * (ticketCount || 1)).toFixed(2)})` : ''}`
                     )}
                   </button>
 
