@@ -1,6 +1,8 @@
 import Event from '../models/Event.js';
 import EventDescription from '../models/EventDescription.js';
 import Ticket from '../models/Ticket.js';
+import { getConnection } from "../database/connection.js";
+import { publishEvent } from "../util/rabbitmq.js";
 
 const getEvents = async () => {
   try {
@@ -76,6 +78,33 @@ const createEvent = async (eventData) => {
 
     await connection.commit();
     return await getEvent(eventResult.insertId);
+    // Validate input data
+    const { title, description, date, location, capacity } = event;
+    if (
+      !title ||
+      !description ||
+      !date ||
+      !location ||
+      capacity === undefined
+    ) {
+      throw new Error("Missing required fields for creating an event");
+    }
+
+    const connection = await getConnection();
+    const [result] = await connection.execute(
+      "INSERT INTO events (title, description, date, location, capacity) VALUES (?, ?, ?, ?, ?)",
+      [title, description, date, location, capacity]
+    );
+
+    const newEvent = { id: result.insertId, ...event };
+
+    // Publish the event to RabbitMQ
+    await publishEvent({
+      type: "EventCreated",
+      payload: newEvent,
+    });
+
+    return newEvent;
   } catch (error) {
     await connection.rollback();
     console.error("Error creating event:", error);
@@ -134,6 +163,28 @@ const updateEvent = async (eventId, eventData) => {
 
     await connection.commit();
     return await getEvent(eventId);
+    const connection = await getConnection();
+    await connection.execute(
+      "UPDATE events SET title = ?, description = ?, date = ?, location = ?, capacity = ? WHERE id = ?",
+      [
+        event.title,
+        event.description,
+        event.date,
+        event.location,
+        event.capacity,
+        eventId,
+      ]
+    );
+
+    const updatedEvent = { id: eventId, ...event };
+
+    // Publish the event to RabbitMQ
+    await publishEvent({
+      type: "EventUpdated",
+      payload: updatedEvent,
+    });
+
+    return updatedEvent;
   } catch (error) {
     await connection.rollback();
     console.error("Error updating event:", error);
@@ -164,6 +215,28 @@ const deleteEvent = async (eventId) => {
 
     await connection.commit();
     return true;
+
+    const connection = await getConnection();
+    const [rows] = await connection.execute(
+      "SELECT * FROM events WHERE id = ?",
+      [eventId]
+    );
+
+    if (rows.length === 0) {
+      throw new Error("Event not found");
+    }
+
+    const deletedEvent = rows[0];
+
+    await connection.execute("DELETE FROM events WHERE id = ?", [eventId]);
+
+    // Publish the event to RabbitMQ
+    await publishEvent({
+      type: "EventDeleted",
+      payload: deletedEvent,
+    });
+
+    return deletedEvent;
   } catch (error) {
     await connection.rollback();
     console.error("Error deleting event:", error);

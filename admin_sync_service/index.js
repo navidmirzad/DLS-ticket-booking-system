@@ -1,17 +1,24 @@
 import dotenv from "dotenv";
-import { connectRabbit } from "./rabbitmq.js";
-import { syncEventsFromMySQL } from "./sync.js";
+import { connectRabbit, consumeQueue } from "./rabbitmq.js";
+import { connectMySQL } from "./mysql.js";
 
 dotenv.config();
 
 (async () => {
   try {
+    // Connect to RabbitMQ
     await connectRabbit();
     console.log("RabbitMQ connected ✅");
 
-    // Sync events from MySQL to RabbitMQ
-    await syncEventsFromMySQL();
+    // Connect to MySQL
+    await connectMySQL();
+    console.log("MySQL connected ✅");
+
+    // Start consuming messages from RabbitMQ
+    await consumeQueue();
+    console.log("Consuming messages from RabbitMQ started ✅");
   } catch (error) {
     console.error("Error in AdminSyncService:", error);
+    process.exit(1);
   }
 })();

@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
+import { connectRabbit } from "./util/rabbitmq.js";
+import { isAuthenticated } from "./middleware/auth.js";
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
 import swaggerUi from 'swagger-ui-express';
@@ -22,9 +24,14 @@ app.use(
 app.use(express.json());
 
 try {
-  await createDatabase();
+  await connectRabbit(); // Connect to RabbitMQ
+  console.log("RabbitMQ connected ✅");
+
+  await createDatabase(); // Initialize the database
+  console.log("Database initialized ✅");
 } catch (error) {
-  console.error("Error creating database:", error);
+  console.error("Error initializing services:", error);
+  process.exit(1); // Exit if initialization fails
 }
 
 import eventRoutes from "./routes/event.js";

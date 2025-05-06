@@ -1,5 +1,4 @@
 import amqp from "amqplib";
-import { syncToMySQL } from "./sync.js";
 
 let channel;
 
@@ -24,31 +23,4 @@ export const connectRabbit = async (retries = 5, delay = 5000) => {
 export const publishEvent = async (event) => {
   if (!channel) throw new Error("RabbitMQ channel not initialized");
   channel.sendToQueue("eventQueue", Buffer.from(JSON.stringify(event)));
-};
-
-export const consumeQueue = async () => {
-  if (!channel) throw new Error("RabbitMQ channel not initialized");
-
-  await channel.consume(
-    "eventQueue",
-    async (msg) => {
-      if (msg !== null) {
-        const event = JSON.parse(msg.content.toString());
-        console.log("Event received:", event);
-
-        // Synchronize changes to MySQL and MongoDB
-        if (
-          event.type === "EventCreated" ||
-          event.type === "EventUpdated" ||
-          event.type === "EventDeleted"
-        ) {
-          await syncToMySQL(event);
-        }
-
-        // Acknowledge the message
-        channel.ack(msg);
-      }
-    },
-    { noAck: false }
-  );
 };

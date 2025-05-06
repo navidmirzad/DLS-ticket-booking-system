@@ -8,6 +8,7 @@ type EventFormData = {
   date: string;
   location: string;
   image: string;
+  capacity: number; // Added capacity field
 };
 
 const EventForm = () => {
@@ -20,6 +21,7 @@ const EventForm = () => {
     date: "",
     location: "",
     image: "",
+    capacity: 0, // Initialize capacity
   });
 
   const [status, setStatus] = useState<string | null>(null);
@@ -34,15 +36,17 @@ const EventForm = () => {
           date: new Date(event.date).toISOString().slice(0, 16),
           location: event.location,
           image: event.image || "",
+          capacity: event.capacity, // Populate capacity
         });
       })
       .catch(() => setStatus("Failed to load event"));
   }, [id]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: name === "capacity" ? parseInt(value, 10) || 0 : value, // Handle capacity as a number
     }));
   };
 
@@ -137,6 +141,12 @@ const EventForm = () => {
           required
         />
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+        <input type="text" name="title" placeholder="Title" value={formData.title} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="w-full p-2 border rounded" required /> {/* Added capacity field */}
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
           {isEditMode ? "Update" : "Submit"}
         </button>
       </form>
