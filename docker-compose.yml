@@ -127,6 +127,25 @@ services:
     networks:
       - rabbitmq_network
 
+  admin_sync_service:
+    build: ./admin_sync_service
+    ports:
+      - "3004:3004"
+    depends_on:
+      - mysql
+      - mongodb
+      - rabbitmq
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MYSQL_HOST=${DB_HOST}
+      - MYSQL_PORT=${DB_PORT}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MONGODB_URL=${MONGODB_URL}/${CUSTOMER_DB}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    networks:
+      - rabbitmq_network
 
   mysql:
     image: mysql:8.0

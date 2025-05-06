@@ -22,8 +22,9 @@ app.use(ticketRouter);
 import eventRouter from "./routes/eventRouter.js";
 app.use(eventRouter);
 
-import { connectRabbit } from './util/rabbitmq.js';
+import { connectRabbit, consumeQueue } from './util/rabbitmq.js';
 await connectRabbit();
+await consumeQueue();
 
 const PORT = process.env.CUSTOMER_BACKEND_PORT || 3002;
 app.listen(PORT, () => {
