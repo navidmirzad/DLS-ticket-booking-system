@@ -1,6 +1,6 @@
 import amqp from "amqplib";
 import dotenv from "dotenv";
-import Event from "../models/mongo/Event.js"; // Import the Event model
+import {Event} from "../models/mongo/index.js"; // Import the Event model
 
 dotenv.config();
 let channel;
