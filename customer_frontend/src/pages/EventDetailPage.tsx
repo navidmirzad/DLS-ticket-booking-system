@@ -73,11 +73,11 @@ const EventDetailPage: React.FC = () => {
 
         try {
           // Fetch ticket types - handle this separately so event can still display even if tickets fail
-        const ticketTypesData = await getTicketTypesForEvent(id);
-        console.log('Fetched ticket types:', ticketTypesData);
+          const ticketTypesData = await getTicketTypesForEvent(id);
+          console.log('Fetched ticket types:', ticketTypesData);
 
           if (ticketTypesData && ticketTypesData.length > 0) {
-        setTicketTypes(ticketTypesData);
+            setTicketTypes(ticketTypesData);
 
             // Verify the ticket data has all required fields
             const hasValidTicketData = ticketTypesData.some(ticket =>
@@ -281,83 +281,83 @@ const EventDetailPage: React.FC = () => {
                 ) : (
                     <>
                       {/* Ticket type selection */}
-                <div className="space-y-4 mb-6">
-                  {ticketTypes.map(ticket => (
+                      <div className="space-y-4 mb-6">
+                        {ticketTypes.map(ticket => (
                             ticket && ticket.id && ticket.price !== undefined ? (
-                      <div
-                          key={ticket.id}
-                          className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition-all duration-300
-                      ${ticket.id === selectedTicketType
-                              ? 'border-accent bg-accent/5'
-                              : 'border-neutral-100 hover:border-accent/30'}`}
-                          onClick={() => handleTicketTypeChange(ticket.id)}
-                      >
-                        <div>
+                                <div
+                                    key={ticket.id}
+                                    className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition-all duration-300
+                          ${ticket.id === selectedTicketType
+                                        ? 'border-accent bg-accent/5'
+                                        : 'border-neutral-100 hover:border-accent/30'}`}
+                                    onClick={() => handleTicketTypeChange(ticket.id)}
+                                >
+                                  <div>
                                     <h4 className="font-medium text-text">{ticket.name || 'Standard Ticket'}</h4>
                                     <p className="text-sm text-neutral-600">{ticket.description || 'Standard admission'}</p>
                                     <p className="text-xs text-neutral-500 mt-1">{ticket.available || 'Limited'} tickets available</p>
                                     <p className="text-sm font-semibold text-accent mt-1">${typeof ticket.price === 'number' ? ticket.price.toFixed(2) : '0.00'}</p>
-                        </div>
-                        <div className="h-5 w-5 rounded-full border-2 flex items-center justify-center">
-                          {ticket.id === selectedTicketType && (
-                              <div className="h-3 w-3 rounded-full bg-accent"></div>
-                          )}
-                        </div>
-                      </div>
+                                  </div>
+                                  <div className="h-5 w-5 rounded-full border-2 flex items-center justify-center">
+                                    {ticket.id === selectedTicketType && (
+                                        <div className="h-3 w-3 rounded-full bg-accent"></div>
+                                    )}
+                                  </div>
+                                </div>
                             ) : null
-                  ))}
-                </div>
+                        ))}
+                      </div>
 
                       {/* Ticket quantity selection */}
-                <div className="flex justify-between items-center mb-6">
-                  <div className="font-medium text-text">Number of tickets</div>
-                  <div className="flex items-center border border-neutral-200 rounded-lg">
-                    <button
-                        onClick={() => handleTicketChange(-1)}
-                        disabled={selectedTickets === 0}
-                        className="p-2 disabled:opacity-50"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="px-4">{selectedTickets}</span>
-                    <button
-                        onClick={() => handleTicketChange(1)}
-                        disabled={selectedTickets === 10 || !selectedTicketType}
-                        className="p-2 disabled:opacity-50"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
+                      <div className="flex justify-between items-center mb-6">
+                        <div className="font-medium text-text">Number of tickets</div>
+                        <div className="flex items-center border border-neutral-200 rounded-lg">
+                          <button
+                              onClick={() => handleTicketChange(-1)}
+                              disabled={selectedTickets === 0}
+                              className="p-2 disabled:opacity-50"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="px-4">{selectedTickets}</span>
+                          <button
+                              onClick={() => handleTicketChange(1)}
+                              disabled={selectedTickets === 10 || !selectedTicketType}
+                              className="p-2 disabled:opacity-50"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
 
                       {/* Price calculation */}
                       {selectedTickets > 0 && currentTicketType && typeof currentTicketType.price === 'number' && (
-                    <div className="mb-6 bg-primary p-4 rounded-lg">
-                      <div className="flex justify-between mb-2">
+                          <div className="mb-6 bg-primary p-4 rounded-lg">
+                            <div className="flex justify-between mb-2">
                               <span className="text-neutral-600">{currentTicketType.name || 'Standard Ticket'} × {selectedTickets}</span>
-                        <span className="font-medium text-text">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-neutral-600">Service Fee</span>
-                        <span className="font-medium text-text">${(currentTicketType.price * selectedTickets * 0.15).toFixed(2)}</span>
-                      </div>
-                      <div className="border-t border-neutral-100 pt-2 mt-2">
-                        <div className="flex justify-between">
-                          <span className="font-medium">Total</span>
-                          <span className="font-bold">${(currentTicketType.price * selectedTickets * 1.15).toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                )}
+                              <span className="font-medium text-text">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                              <span className="text-neutral-600">Service Fee</span>
+                              <span className="font-medium text-text">${(currentTicketType.price * selectedTickets * 0.15).toFixed(2)}</span>
+                            </div>
+                            <div className="border-t border-neutral-100 pt-2 mt-2">
+                              <div className="flex justify-between">
+                                <span className="font-medium">Total</span>
+                                <span className="font-bold">${(currentTicketType.price * selectedTickets * 1.15).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                      )}
 
                       {/* Book button */}
-                <button
-                    onClick={handleBookNow}
-                    disabled={selectedTickets === 0 || !selectedTicketType}
-                    className="w-full py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Book Now
-                </button>
+                      <button
+                          onClick={handleBookNow}
+                          disabled={selectedTickets === 0 || !selectedTicketType}
+                          className="w-full py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Book Now
+                      </button>
                     </>
                 )}
               </div>

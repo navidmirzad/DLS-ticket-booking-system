@@ -106,9 +106,9 @@ export const createTicket = async (eventId, userId, email, ticketsBought) => {
 
     // Send notifications for all tickets
     for (const ticket of createdIndividualTickets) {
-    await sendToQueue({
-        type: "TICKET_BOUGHT",
-        to: email,
+        await sendToQueue({
+            type: "TICKET_BOUGHT",
+            to: email,
             id: ticket._id,
             ticket: {
                 id: ticket.ticket_id,

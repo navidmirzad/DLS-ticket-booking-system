@@ -17,28 +17,28 @@ export const getTicketByID = async (req, res) => {
     const ticket = await getTicketByIDService(ticketId);
 
     if (!ticket) {
-            return res.status(404).send({ error: "Ticket not found" });
-        }
-
-        res.send({ data: ticket });
-  } catch (err) {
-        res.status(500).send({ error: err.message });
+      return res.status(404).send({ error: "Ticket not found" });
     }
+
+    res.send({ data: ticket });
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
 };
 
 export const getTicketsByUserID = async (req, res) => {
-    try {
+  try {
     const userId = req.params.userId;
-        const tickets = await getTicketsByUserIDService(userId);
+    const tickets = await getTicketsByUserIDService(userId);
 
-        res.send({ data: tickets });
+    res.send({ data: tickets });
   } catch (err) {
-        res.status(500).send({ error: err.message });
-    }
+    res.status(500).send({ error: err.message });
+  }
 };
 
 export const buyTickets = async (req, res) => {
-    try {
+  try {
     const { eventId, userId = "guest", email, ticketsBought } = req.body;
 
     const result = await createTicket(eventId, userId, email, ticketsBought);
@@ -46,25 +46,25 @@ export const buyTickets = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
-    }
+  }
 };
 
 export const refundTicket = async (req, res) => {
-    try {
-        const ticketId = req.params.ticketId;
+  try {
+    const ticketId = req.params.ticketId;
 
     if (!ticketId) {
-            return res.status(400).send({ error: "Missing ticket id" });
-        }
+      return res.status(400).send({ error: "Missing ticket id" });
+    }
 
-        const ticket = await deleteTicket(ticketId);
+    const ticket = await deleteTicket(ticketId);
 
     if (!ticket) {
-            return res.status(404).send({ error: "Ticket not found" });
-        }
-
-        res.send({ data: ticket });
-  } catch (err) {
-        res.status(500).send({ error: err.message });
+      return res.status(404).send({ error: "Ticket not found" });
     }
+
+    res.send({ data: ticket });
+  } catch (err) {
+    res.status(500).send({ error: err.message });
+  }
 };
