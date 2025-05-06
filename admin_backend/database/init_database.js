@@ -5,63 +5,61 @@ dotenv.config();
 async function createDatabase() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
   });
 
-  try {
-    await connection.query(
-      `CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`
-    );
-    await connection.query(`USE ${process.env.DB_NAME}`);
 
+  try {
     await connection.query(`
-      CREATE TABLE IF NOT EXISTS events (
+      CREATE TABLE IF NOT EXISTS EVENT_DESCRIPTION (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255),
+        name VARCHAR(255),
+        image VARCHAR(255),
+        date DATE,
         description TEXT,
         location VARCHAR(255),
-        date DATETIME,
-        capacity INT, 
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS tickets (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        event_id INT,
-        type VARCHAR(50),
-        price DECIMAL(10, 2),
-        available INT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (event_id) REFERENCES events(id)
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
 
     await connection.query(`
-      CREATE TABLE IF NOT EXISTS orders (
+      CREATE TABLE IF NOT EXISTS EVENT (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        description_id INT,
+        tickets_available BOOLEAN DEFAULT true,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_at DATETIME DEFAULT NULL,
+        FOREIGN KEY (description_id) REFERENCES EVENT_DESCRIPTION(id)
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS TICKETS (
         id INT AUTO_INCREMENT PRIMARY KEY,
         event_id INT,
-        ticket_id INT,
-        quantity INT,
-        total_amount DECIMAL(10, 2),
-        status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
-        ordered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (event_id) REFERENCES events(id),
-        FOREIGN KEY (ticket_id) REFERENCES tickets(id)
+        price DECIMAL(10, 2),
+        type VARCHAR(50),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (event_id) REFERENCES EVENT(id)
       )
     `);
 
     await connection.query(`
-      CREATE TABLE IF NOT EXISTS payments (
+      CREATE TABLE IF NOT EXISTS ORDERS (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        order_id INT,
-        amount_paid DECIMAL(10, 2),
-        method ENUM('credit_card', 'paypal', 'bank_transfer'),
-        status ENUM('pending', 'successful', 'failed') DEFAULT 'pending',
-        paid_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (order_id) REFERENCES orders(id)
+        email VARCHAR(255),
+        tickets_bought INT,
+        total_price DECIMAL(10, 2),
+        status VARCHAR(50),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_at DATETIME DEFAULT NULL
       )
     `);
 
