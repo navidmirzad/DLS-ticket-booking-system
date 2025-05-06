@@ -11,12 +11,20 @@ const api = axios.create({
 
 export interface Event {
   _id: string;
-  title: string;
-  description: string;
-  location: string;
-  date: string;
-  capacity: number;
-  created_at: string;
+  title: string,
+  image: string,
+  description: string,
+  location: string,
+  date: string,
+  capacity: number,
+  created_at: Date,
+  tickets_available: number,
+  tickets: [
+    {
+      price: number,
+      type: string,
+    },
+  ],
 }
 
 // Updated Ticket interface with price information

@@ -14,7 +14,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Link to={`/events/${event._id}`} className="card group">
         <div className="relative overflow-hidden aspect-[16/9]">
           <img
-              src="https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg"  // Placeholder image
+              src={event.image || "https://images.com/photos/1105666/pexels-photo-1105666.jpeg"}  // Placeholder image
               alt={event.title}
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
