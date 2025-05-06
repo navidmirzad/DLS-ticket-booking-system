@@ -28,14 +28,14 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=${MONGODB_URL}/${AUTH_DB}
+      - DATABASE_URL=${MONGODB_URL_AUTH}/${AUTH_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - ADMIN_FRONTEND=${ADMIN_FRONTEND}
       - ADMIN_BACKEND=${ADMIN_BACKEND}
     depends_on:
-      - mongodb
+      - mongodb_auth
       - rabbitmq
     networks:
       - rabbitmq_network
@@ -70,7 +70,7 @@ services:
       - ".env"
     environment:
       - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=${MONGODB_URL}/${CUSTOMER_DB}
+      - DATABASE_URL=${MONGODB_URL_CUSTOMER}/${CUSTOMER_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
       - CUSTOMER_BACKEND_PORT=${CUSTOMER_BACKEND_PORT}
     depends_on:
@@ -167,8 +167,18 @@ services:
     networks:
       - rabbitmq_network
 
+  mongodb_auth:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_auth_data:/data/db
+    networks:
+      - rabbitmq_network
+
 volumes:
   mongodb_data:
+  mongodb_auth_data:
   mysql_data:
 
 networks:
