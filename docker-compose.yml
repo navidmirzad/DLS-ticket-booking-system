@@ -210,6 +210,29 @@ services:
     networks:
       - rabbitmq_network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - rabbitmq_network
+
+  rabbitmq_exporter:
+    image: kbudde/rabbitmq-exporter:latest
+    container_name: rabbitmq_exporter
+    restart: always
+    ports:
+      - "9419:9419"
+    environment:
+      RABBIT_URL: http://admin:admin@rabbitmq:15672
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+
 volumes:
   mongodb_data:
   mongodb_auth_data:

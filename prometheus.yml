@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'auth_service'
+    static_configs:
+      - targets: ['auth_service:3000']
+
+  - job_name: 'admin_backend'
+    static_configs:
+      - targets: ['admin_backend:3001']
+
+  - job_name: 'customer_backend'
+    static_configs:
+      - targets: ['customer_backend:3002']
+
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq_exporter:9419']

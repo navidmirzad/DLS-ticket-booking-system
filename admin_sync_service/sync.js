@@ -3,6 +3,7 @@ import { getMySQLConnection } from "./mysql.js";
 export const syncToMySQL = async (event) => {
   const connection = getMySQLConnection();
 
+  /*
   try {
     if (event.type === "EventCreated") {
       await connection.execute(
@@ -36,4 +37,5 @@ export const syncToMySQL = async (event) => {
   } catch (error) {
     console.error("Error syncing to MySQL:", error);
   }
+    */
 };

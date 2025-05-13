@@ -3,12 +3,12 @@ import { syncToMySQL } from "./sync.js";
 
 let channel;
 
-/* export const connectRabbit = async (retries = 5, delay = 5000) => {
+export const connectRabbit = async (retries = 5, delay = 5000) => {
   while (retries > 0) {
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
       channel = await connection.createChannel();
-      await channel.assertQueue("eventQueue"); // Ensure the queue exists
+      await channel.assertQueue("ticketQueue"); // Ensure the queue exists
       console.log("RabbitMQ connected ✅");
       return;
     } catch (error) {
@@ -21,29 +21,17 @@ let channel;
   }
 };
 
-export const publishEvent = async (event) => {
-  if (!channel) throw new Error("RabbitMQ channel not initialized");
-  channel.sendToQueue("eventQueue", Buffer.from(JSON.stringify(event)));
-}; */
-
 export const consumeQueue = async () => {
   if (!channel) throw new Error("RabbitMQ channel not initialized");
 
   await channel.consume(
-    "eventQueue",
+    "ticketQueue",
     async (msg) => {
       if (msg !== null) {
-        const event = JSON.parse(msg.content.toString());
-        console.log("Event received:", event);
+        const ticket = JSON.parse(msg.content.toString());
+        console.log("Ticket received:", ticket);
 
-        // Synchronize changes to MySQL and MongoDB
-        if (
-          event.type === "EventCreated" ||
-          event.type === "EventUpdated" ||
-          event.type === "EventDeleted"
-        ) {
-          await syncToMySQL(event);
-        }
+        await syncToMySQL(ticket);
 
         // Acknowledge the message
         channel.ack(msg);
