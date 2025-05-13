@@ -14,30 +14,15 @@ export const getEventByID = async (eventId) => {
 };
 
 export const getTicketTypesForEvent = async (eventId) => {
-  // This is a placeholder function that will return ticket types for an event
-  // In a real implementation, you would fetch this from your database
+  // Simplified to return only a single standard ticket type
   return [
     {
-      id: "general",
-      name: "General Admission",
-      description: "Standard entry to the event",
+      id: "standard",
+      name: "Standard Admission",
+      description: "Entry ticket to the event",
       price: 50,
       available: 200,
-    },
-    {
-      id: "vip",
-      name: "VIP Access",
-      description: "Premium seating and exclusive perks",
-      price: 100,
-      available: 50,
-    },
-    {
-      id: "premium",
-      name: "Premium Package",
-      description: "All-inclusive experience with backstage access",
-      price: 150,
-      available: 20,
-    },
+    }
   ];
 };
 

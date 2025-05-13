@@ -9,7 +9,7 @@ interface Props {
 const EventCard = ({ event }: Props) => {
   return (
     <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden h-full flex flex-col transition-transform hover:shadow-lg hover:-translate-y-1">
-      <div className="h-56">
+      <div className="h-36">
         <img 
           src={event.image || "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg"} 
           alt={event.title} 
@@ -20,7 +20,7 @@ const EventCard = ({ event }: Props) => {
       <div className="p-5">
         <h2 className="text-xl font-bold text-white mb-4">{event.title}</h2>
         
-        <div className="space-y-3 mb-5">
+        <div className="space-y-3">
           <div className="flex items-center">
             <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -27,7 +27,6 @@ export interface Ticket extends BaseModel {
   ticket_id: string;
   event_id: string;
   ticket_price: number;
-  ticket_type: "STANDARD" | "VIP" | "EARLY_BIRD" | "GROUP";
 }
 
 export interface Order extends BaseModel {

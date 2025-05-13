@@ -83,15 +83,13 @@ const CheckoutPage: React.FC = () => {
     try {
       const userId = user?.id || 'guest';
 
-      // FIXED: Convert ticket type to lowercase to match backend expectations
-      // Backend expects "vip", "standard", etc. as ticketId
-      const ticketTypeId = selectedTicketType.ticket_type.toLowerCase();
+      console.log("Processing ticket purchase", eventId, userId, email, ticketCount);
 
       await buyTicket(
-          eventId,
-          userId,
-          email,
-          [{ ticketId: ticketTypeId, quantity: ticketCount }]
+        eventId,
+        userId,
+        email,
+        [{ ticketId: 'standard', quantity: ticketCount }]
       );
 
       setIsProcessing(false);

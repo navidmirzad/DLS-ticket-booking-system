@@ -104,7 +104,7 @@ const createEvent = async (eventData) => {
 
     const [eventResult] = await connection.query(
       "INSERT INTO EVENT (description_id, tickets_available) VALUES (?, ?)",
-      [descResult.insertId, true]
+      [descResult.insertId, eventData.capacity]
     );
 
     if (eventData.tickets && eventData.tickets.length > 0) {

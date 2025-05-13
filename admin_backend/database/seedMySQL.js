@@ -79,7 +79,7 @@ export async function seedMySQL() {
           image: eventDescRows[0].image,
           date: eventDescRows[0].date,
           capacity: eventDescRows[0].capacity,
-          tickets_available: true,
+          tickets_available: eventDescRows[0].capacity,
         },
       };
 

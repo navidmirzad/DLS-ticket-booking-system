@@ -39,7 +39,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-900">
       <Navbar />
-      <main className="px-4 py-6 max-w-7xl mx-auto">
+      <main className="py-6 max-w-7xl mx-auto">
         <Routes>
           <Route path="/" element={<EventList events={events} />} />
           <Route path="/login" element={<Login />} />

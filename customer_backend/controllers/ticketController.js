@@ -39,9 +39,9 @@ export const getTicketsByUserID = async (req, res) => {
 
 export const buyTickets = async (req, res) => {
   try {
-    const { eventId, userId = "guest", email, ticketsBought } = req.body;
+    const { eventId, userId = "guest", email, quantity } = req.body;
 
-    const result = await createTicket(eventId, userId, email, ticketsBought);
+    const result = await createTicket(eventId, userId, email, quantity);
     res.status(201).json(result);
   } catch (err) {
     console.error(err);
