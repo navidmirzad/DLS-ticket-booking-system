@@ -79,75 +79,109 @@ const EventForm = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="text-xl font-bold mb-4">
+    <div className="max-w-md mx-auto p-4 bg-gray-900 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-white">
         {isEditMode ? "Edit Event" : "Create Event"}
       </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Event Image URL</label>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Event Image URL</label>
           <input
             type="url"
             name="image"
             placeholder="https://example.com/image.jpg"
             value={formData.image}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {formData.image && (
-            <img
-              src={formData.image}
-              alt="Event preview"
-              className="mt-2 w-full h-48 object-cover rounded"
-              onError={(e) => {
-                const img = e.target as HTMLImageElement;
-                img.style.display = 'none';
-              }}
-            />
+            <div className="mt-3 border border-gray-700 rounded-md overflow-hidden">
+              <img
+                src={formData.image}
+                alt="Event preview"
+                className="w-full h-48 object-cover"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  img.style.display = 'none';
+                }}
+              />
+            </div>
           )}
         </div>
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={formData.title}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="datetime-local"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      
-        <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="w-full p-2 border rounded" required /> {/* Added capacity field */}
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          {isEditMode ? "Update" : "Submit"}
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Title</label>
+          <input
+            type="text"
+            name="title"
+            placeholder="Event title"
+            value={formData.title}
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Description</label>
+          <textarea
+            name="description"
+            placeholder="Event description"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Date & Time</label>
+          <input
+            type="datetime-local"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Location</label>
+          <input
+            type="text"
+            name="location"
+            placeholder="Event location"
+            value={formData.location}
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Capacity</label>
+          <input 
+            type="number" 
+            name="capacity" 
+            placeholder="Number of attendees" 
+            value={formData.capacity} 
+            onChange={handleChange} 
+            className="w-full p-3 border border-gray-700 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+            required 
+          />
+        </div>
+        
+        <button 
+          type="submit" 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+        >
+          {isEditMode ? "Update Event" : "Create Event"}
         </button>
       </form>
+      
       {status && (
-        <div className="mt-4 p-2 rounded text-center" style={{ backgroundColor: status.includes("Failed") ? "#fee2e2" : "#dcfce7" }}>
+        <div className={`mt-5 p-3 rounded-md text-center font-medium ${status.includes("Failed") ? "bg-red-900 text-red-100" : "bg-green-900 text-green-100"}`}>
           {status}
         </div>
       )}

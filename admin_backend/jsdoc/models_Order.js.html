@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/Order.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/Order.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
+
+/**
+ * Order model class representing a customer order in the database
+ * @class
+ */
+class Order {
+  /**
+   * Create an Order instance
+   * @param {Object} data - Order data from database
+   * @param {number} data.id - Order ID
+   * @param {string} data.email - Customer email
+   * @param {number} data.tickets_bought - Number of tickets purchased
+   * @param {number} data.total_price - Total price of the order
+   * @param {string} data.status - Order status
+   * @param {Date} data.created_at - Creation timestamp
+   * @param {Date} data.updated_at - Last update timestamp
+   * @param {Date|null} data.deleted_at - Deletion timestamp or null if not deleted
+   */
+  constructor(data) {
+    this.id = data.id;
+    this.email = data.email;
+    this.tickets_bought = data.tickets_bought;
+    this.total_price = data.total_price;
+    this.status = data.status;
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
+    this.deleted_at = data.deleted_at;
+  }
+
+  /**
+   * Creates a database connection
+   * @static
+   * @async
+   * @returns {Promise&lt;Object>} Database connection
+   */
+  static async getConnection() {
+    return await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+  }
+
+  /**
+   * Find an order by its ID
+   * @static
+   * @async
+   * @param {number} id - Order ID to find
+   * @returns {Promise&lt;Order|null>} Order instance or null if not found
+   */
+  static async findById(id) {
+    const connection = await this.getConnection();
+    try {
+      const [rows] = await connection.query('SELECT * FROM ORDERS WHERE id = ? AND deleted_at IS NULL', [id]);
+      return rows.length ? new Order(rows[0]) : null;
+    } finally {
+      await connection.end();
+    }
+  }
+
+  /**
+   * Find orders by customer email
+   * @static
+   * @async
+   * @param {string} email - Customer email to search for
+   * @returns {Promise&lt;Array&lt;Order>>} Array of Order instances
+   */
+  static async findByEmail(email) {
+    const connection = await this.getConnection();
+    try {
+      const [rows] = await connection.query('SELECT * FROM ORDERS WHERE email = ? AND deleted_at IS NULL', [email]);
+      return rows.map(row => new Order(row));
+    } finally {
+      await connection.end();
+    }
+  }
+
+  /**
+   * Create a new order in the database
+   * @static
+   * @async
+   * @param {Object} orderData - Data for the new order
+   * @param {string} orderData.email - Customer email
+   * @param {number} orderData.tickets_bought - Number of tickets purchased
+   * @param {number} orderData.total_price - Total price of the order
+   * @param {string} orderData.status - Order status
+   * @returns {Promise&lt;number>} ID of the newly created order
+   */
+  static async create(orderData) {
+    const connection = await this.getConnection();
+    try {
+      const [result] = await connection.query(
+        'INSERT INTO ORDERS (email, tickets_bought, total_price, status) VALUES (?, ?, ?, ?)',
+        [orderData.email, orderData.tickets_bought, orderData.total_price, orderData.status]
+      );
+      return result.insertId;
+    } finally {
+      await connection.end();
+    }
+  }
+
+  /**
+   * Update the status of an order
+   * @static
+   * @async
+   * @param {number} orderId - ID of the order to update
+   * @param {string} status - New status for the order
+   * @returns {Promise&lt;void>}
+   */
+  static async updateStatus(orderId, status) {
+    const connection = await this.getConnection();
+    try {
+      await connection.query(
+        'UPDATE ORDERS SET status = ? WHERE id = ? AND deleted_at IS NULL',
+        [status, orderId]
+      );
+    } finally {
+      await connection.end();
+    }
+  }
+
+  /**
+   * Soft delete an order by setting its deleted_at timestamp
+   * @static
+   * @async
+   * @param {number} orderId - ID of the order to delete
+   * @returns {Promise&lt;void>}
+   */
+  static async softDelete(orderId) {
+    const connection = await this.getConnection();
+    try {
+      await connection.query(
+        'UPDATE ORDERS SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL',
+        [orderId]
+      );
+    } finally {
+      await connection.end();
+    }
+  }
+
+  /**
+   * Restore a previously deleted order
+   * @static
+   * @async
+   * @param {number} orderId - ID of the order to restore
+   * @returns {Promise&lt;void>}
+   */
+  static async restore(orderId) {
+    const connection = await this.getConnection();
+    try {
+      await connection.query(
+        'UPDATE ORDERS SET deleted_at = NULL WHERE id = ?',
+        [orderId]
+      );
+    } finally {
+      await connection.end();
+    }
+  }
+}
+
+export default Order; </code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-routes_admin.html">routes/admin</a></li><li><a href="module-routes_event.html">routes/event</a></li></ul><h3>Classes</h3><ul><li><a href="Event.html">Event</a></li><li><a href="EventDescription.html">EventDescription</a></li><li><a href="Order.html">Order</a></li><li><a href="Ticket.html">Ticket</a></li></ul><h3>Global</h3><ul><li><a href="global.html#channel">channel</a></li><li><a href="global.html#connectRabbit">connectRabbit</a></li><li><a href="global.html#createDatabase">createDatabase</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#getEvent">getEvent</a></li><li><a href="global.html#getEvents">getEvents</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#publishEvent">publishEvent</a></li><li><a href="global.html#restoreEvent">restoreEvent</a></li><li><a href="global.html#updateEvent">updateEvent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue May 13 2025 12:22:37 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

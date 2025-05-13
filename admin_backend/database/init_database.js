@@ -2,6 +2,19 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
 
+/**
+ * Initializes the database by creating necessary tables if they don't exist
+ * 
+ * Creates the following tables:
+ * - EVENT_DESCRIPTION: Stores event details such as title, image, capacity, etc.
+ * - EVENT: Stores event records with references to descriptions
+ * - TICKETS: Stores ticket information for events
+ * - ORDERS: Stores customer orders
+ * 
+ * @async
+ * @returns {Promise<void>}
+ * @throws {Error} If there's an error creating the database or tables
+ */
 async function createDatabase() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
