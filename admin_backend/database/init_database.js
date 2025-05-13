@@ -8,9 +8,8 @@ async function createDatabase() {
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
   });
-
 
   try {
     await connection.query(`
@@ -18,6 +17,7 @@ async function createDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255),
         image VARCHAR(255),
+        capacity INT,
         date DATE,
         description TEXT,
         location VARCHAR(255),

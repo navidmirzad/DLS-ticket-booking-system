@@ -1,3 +1,4 @@
+// src/services/api.ts
 import axios, { AxiosResponse } from 'axios';
 
 const API_URL = 'http://localhost:3002';
@@ -9,26 +10,86 @@ const api = axios.create({
   },
 });
 
+// Add token to requests if available
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Event interface based on MongoDB model
 export interface Event {
+  _id: string;
+  id: string;
+  tickets_available: number;
+  title: string;
+  image?: string;
+  date: string;
+  description: string;
+  location: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  __type?: string;
+}
+
+// Simplified Event interface for component usage
+export interface SimpleEvent {
   _id: string;
   title: string;
   description: string;
   location: string;
   date: string;
   capacity: number;
-  created_at: string;
+  image?: string;
+  created_at?: string;
 }
 
-// Updated Ticket interface with price information
+// Ticket interface from MongoDB model
 export interface Ticket {
   _id: string;
-  eventId: string;
-  userId: number;
+  ticket_id: string;
+  event_id: string;
+  ticket_price: number;
+  ticket_type: 'STANDARD' | 'VIP' | 'EARLY_BIRD' | 'GROUP';
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  __type?: string;
+}
+
+// Order interface from MongoDB model
+export interface Order {
+  _id: string;
+  order_id: string; // This is the UUID for the order
   email: string;
-  purchasedAt: Date;
-  price: number;
-  type: string; // e.g., "General Admission", "VIP", etc.
-  description?: string;
+  tickets_bought: string[]; // <-- CORRECTED: Now an array of ticket_id strings (UUIDs of created Ticket documents)
+  total_price: number;
+  order_status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  __type?: string;
+}
+
+interface BuyTicketResponsePayload {
+  tickets: Ticket[]; // Your existing Ticket interface should work for the items in this array
+  order: Order;    // Your (now updated) Order interface
+}
+
+// User interface from MongoDB model
+export interface User {
+  _id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  role: 'USER' | 'ADMIN' | 'EVENT_MANAGER';
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  __type?: string;
 }
 
 // Define ticket type interface for the ticket selection UI
@@ -38,28 +99,42 @@ export interface TicketType {
   description: string;
   price: number;
   available: number;
+  ticket_type: 'STANDARD' | 'VIP' | 'EARLY_BIRD' | 'GROUP';
 }
 
-// Define response types
+// API response type
 interface ApiResponse<T> {
-  data?: T;
-  message?: string;
   success?: boolean;
+  message?: string;
+  data?: T;
 }
 
-export const getEvents = async (): Promise<Event[]> => {
-  try {
-    const response: AxiosResponse<ApiResponse<Event[]>> = await api.get('/api/event');
-    console.log('API Response:', response); // Log the response to check its structure
+// Helper function to map the complex Event object to a simpler structure
+const mapEventToSimpleEvent = (event: Event): SimpleEvent => {
+  return {
+    _id: event._id,
+    title: event.title,
+    description: event.description,
+    location: event.location,
+    date: event.date,
+    capacity: event.tickets_available,
+    image: event.image,
+    created_at: event.created_at
+  };
+};
 
-    // Access the events array from the `data.data` field
-    if (response.data && response.data.data && Array.isArray(response.data.data)) {
-      return response.data.data;
-    } else if (Array.isArray(response.data)) {
-      return response.data;
+// Get all events
+export const getEvents = async (): Promise<SimpleEvent[]> => {
+  try {
+    const response: AxiosResponse<ApiResponse<Event[]> | Event[]> = await api.get('/api/event');
+
+    if (response.data && Array.isArray(response.data)) {
+      return response.data.map(mapEventToSimpleEvent);
+    } else if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
+      return response.data.data.map(mapEventToSimpleEvent);
     } else {
-      console.error('Error: Response data is not an array', response.data);
-      throw new Error('Response data is not an array');
+      console.error('Unexpected response format:', response.data);
+      throw new Error('Unexpected response format');
     }
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -67,21 +142,16 @@ export const getEvents = async (): Promise<Event[]> => {
   }
 };
 
-export const getEventById = async (eventId: string): Promise<Event> => {
+// Get event by ID
+export const getEventById = async (eventId: string): Promise<SimpleEvent> => {
   try {
     const response: AxiosResponse<ApiResponse<Event> | Event> = await api.get(`/api/event/${eventId}`);
-    console.log('Event by ID Response:', response.data); // Log the response to debug
 
-    // Check if the response follows { data: Event } structure
     if (response.data && 'data' in response.data && response.data.data) {
-      return response.data.data as Event;
-    }
-    // If response is directly the event object
-    else if (response.data && '_id' in response.data) {
-      return response.data as Event;
-    }
-    // If no valid event data is found
-    else {
+      return mapEventToSimpleEvent(response.data.data);
+    } else if (response.data && '_id' in response.data) {
+      return mapEventToSimpleEvent(response.data);
+    } else {
       console.error('Invalid event data structure:', response.data);
       throw new Error('Invalid event data structure');
     }
@@ -91,80 +161,91 @@ export const getEventById = async (eventId: string): Promise<Event> => {
   }
 };
 
-// New function to get ticket types for an event
+// Get ticket types for an event
 export const getTicketTypesForEvent = async (eventId: string): Promise<TicketType[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<TicketType[]> | TicketType[]> =
+    const response: AxiosResponse<ApiResponse<Ticket[]> | Ticket[]> =
         await api.get(`/api/event/${eventId}/ticket-types`);
 
+    // Log the raw response to understand the structure
+    console.log('Raw ticket types response:', response.data);
+
+    // Try to process the response data appropriately
     if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
+      // If we have a proper data structure with valid ticket objects
+      return response.data.data.map((ticket: Ticket) => ({
+        id: ticket._id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
+        name: ticket.ticket_type || 'Standard Ticket',
+        description: `${ticket.ticket_type || 'Standard'} ticket`,
+        price: ticket.ticket_price || 50,
+        available: 100, // Adjust as needed
+        ticket_type: ticket.ticket_type || 'STANDARD'
+      }));
     } else if (Array.isArray(response.data)) {
-      return response.data;
+      // If the data is directly an array
+      return response.data.map((ticket: Ticket) => ({
+        id: ticket._id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
+        name: ticket.ticket_type || 'Standard Ticket',
+        description: `${ticket.ticket_type || 'Standard'} ticket`,
+        price: ticket.ticket_price || 50,
+        available: 100,
+        ticket_type: ticket.ticket_type || 'STANDARD'
+      }));
     } else {
-      // If API doesn't support ticket types yet, return dummy data for now
+      // If the API doesn't return valid data, use fallback values
+      console.warn('Using fallback ticket types due to invalid API response');
       return [
         {
-          id: 'general',
-          name: 'General Admission',
-          description: 'Standard entry to the event',
+          id: 'standard',
+          name: 'Standard Admission',
+          description: 'Regular entry ticket',
           price: 50,
-          available: 200
+          available: 100,
+          ticket_type: 'STANDARD'
         },
         {
           id: 'vip',
           name: 'VIP Access',
-          description: 'Premium seating and exclusive perks',
-          price: 100,
-          available: 50
-        },
-        {
-          id: 'premium',
-          name: 'Premium Package',
-          description: 'All-inclusive experience with backstage access',
+          description: 'Premium experience with exclusive perks',
           price: 150,
-          available: 20
+          available: 20,
+          ticket_type: 'VIP'
         }
       ];
     }
   } catch (error) {
     console.error('Error fetching ticket types:', error);
-    // Return dummy data if API endpoint doesn't exist yet
+    // Return fallback data for development
     return [
       {
-        id: 'general',
-        name: 'General Admission',
-        description: 'Standard entry to the event',
+        id: 'standard',
+        name: 'Standard Admission',
+        description: 'Regular entry ticket',
         price: 50,
-        available: 200
+        available: 100,
+        ticket_type: 'STANDARD'
       },
       {
         id: 'vip',
         name: 'VIP Access',
-        description: 'Premium seating and exclusive perks',
-        price: 100,
-        available: 50
-      },
-      {
-        id: 'premium',
-        name: 'Premium Package',
-        description: 'All-inclusive experience with backstage access',
+        description: 'Premium experience with exclusive perks',
         price: 150,
-        available: 20
+        available: 20,
+        ticket_type: 'VIP'
       }
     ];
   }
 };
 
+// Get ticket by ID
 export const getTicketById = async (ticketId: string): Promise<Ticket> => {
   try {
     const response: AxiosResponse<ApiResponse<Ticket> | Ticket> = await api.get(`/api/ticket/${ticketId}`);
 
-    // Check if response follows { data: Ticket } structure
     if (response.data && 'data' in response.data && response.data.data) {
-      return response.data.data as Ticket;
+      return response.data.data;
     } else if (response.data && '_id' in response.data) {
-      return response.data as Ticket;
+      return response.data;
     } else {
       console.error('Invalid ticket data structure:', response.data);
       throw new Error('Invalid ticket data structure');
@@ -175,15 +256,15 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
   }
 };
 
-export const getTicketsByUserId = async (userId: number): Promise<Ticket[]> => {
+// Get tickets by user ID
+export const getTicketsByUserId = async (userId: string): Promise<Order[]> => {
   try {
-    const response: AxiosResponse<ApiResponse<Ticket[]> | Ticket[]> = await api.get(`/api/ticket/user/${userId}`);
+    const response: AxiosResponse<ApiResponse<Order[]> | Order[]> = await api.get(`/api/ticket/user/${userId}`);
 
-    // Check if the response contains a data property
     if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
-      return response.data.data as Ticket[];
+      return response.data.data;
     } else if (Array.isArray(response.data)) {
-      return response.data as Ticket[];
+      return response.data;
     } else {
       console.error('Invalid tickets data structure:', response.data);
       throw new Error('Invalid tickets data structure');
@@ -194,37 +275,37 @@ export const getTicketsByUserId = async (userId: number): Promise<Ticket[]> => {
   }
 };
 
-// Updated to include ticket type and price
+// Buy a ticket
 export const buyTicket = async (
     eventId: string,
-    userId: number,
+    userId: string,
     email: string,
-    ticketTypeId: string
-): Promise<Ticket> => {
+    ticketsBought: Array<{ ticketId: string; quantity: number }>, // ticketId here is selectedTicketType.name
+): Promise<Order> => { // The function is still expected to return the created Order
   try {
-    const response: AxiosResponse<ApiResponse<Ticket> | Ticket> =
-        await api.post('/api/ticket', {
-          eventId,
-          userId,
-          email,
-          ticketTypeId
+    // Expect the specific BuyTicketResponsePayload structure from the backend
+    const response: AxiosResponse<BuyTicketResponsePayload> = // <-- TYPE CHANGED
+        await api.post('/api/ticket', { // Your baseURL is http://localhost:3002, so this calls http://localhost:3002/api/ticket
+          eventId: eventId,
+          ticketsBought: ticketsBought,
+          email: email,
+          userId: userId
         });
 
-    // Handle potential response structures
-    if (response.data && 'data' in response.data && response.data.data) {
-      return response.data.data as Ticket;
-    } else if (response.data && '_id' in response.data) {
-      return response.data as Ticket;
+    // NEW PARSING LOGIC: Access the 'order' object from response.data
+    if (response.data && response.data.order && response.data.order._id) {
+      return response.data.order; // Success: return the order object
     } else {
-      console.error('Invalid ticket purchase response:', response.data);
-      throw new Error('Invalid ticket purchase response');
+      // This case would mean the backend response structure is not { tickets: [], order: {_id: ...} }
+      console.error('Invalid ticket purchase response structure from backend:', response.data);
+      throw new Error('Invalid ticket purchase response: "order" field missing, malformed, or lacks _id.');
     }
   } catch (error) {
-    console.error('Error buying ticket:', error);
-    throw error;
+    throw new Error('Failed to complete ticket purchase. Please try again later.');
   }
 };
 
+// Refund a ticket
 export const refundTicket = async (ticketId: string): Promise<void> => {
   try {
     await api.delete(`/api/ticket/${ticketId}`);

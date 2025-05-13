@@ -1,35 +1,32 @@
+// src/pages/HomePage.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Calendar,
-  Search,
   ArrowRight,
-  Music,
-  Trophy,
-  Theater,
-  Users,
-  Utensils,
 } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
 import SearchBar from '../components/common/SearchBar';
 import AuthModal from '../components/auth/AuthModal';
-import { getEvents, Event } from '../services/api';  // Import Event interface and API function
+import { getEvents, SimpleEvent } from '../services/api';
 
 const HomePage: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);  // Use the Event interface
+  const [featuredEvents, setFeaturedEvents] = useState<SimpleEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch featured events when the component is mounted
+  // Fetch featured events when the component mounts
   useEffect(() => {
     const fetchFeaturedEvents = async () => {
       try {
         setIsLoading(true);
-        const events = await getEvents(); // getEvents already returns Event[] directly
+        const events = await getEvents();
         console.log('Fetched events:', events);
-        setFeaturedEvents(events);
+
+        // Take only the first 3 events to display as featured
+        setFeaturedEvents(events.slice(0, 3));
       } catch (err) {
         console.error('Error fetching featured events:', err);
         setError('Failed to fetch featured events.');
@@ -78,15 +75,6 @@ const HomePage: React.FC = () => {
                 <SearchBar />
               </motion.div>
             </div>
-
-            <motion.div
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              {/* Category icons could go here */}
-            </motion.div>
           </div>
         </section>
 
@@ -140,6 +128,53 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
+        {/* Event Categories */}
+        <section className="bg-white section">
+          <div className="container-custom">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-text mb-4">Browse by Category</h2>
+              <p className="text-text-secondary max-w-2xl mx-auto">
+                Explore events by category to find exactly what you're looking for
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link to="/events?category=concert" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
+                <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="font-medium text-text mb-1">Concerts</h3>
+                <p className="text-sm text-text-secondary">Live music experiences</p>
+              </Link>
+
+              <Link to="/events?category=sports" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
+                <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="font-medium text-text mb-1">Sports</h3>
+                <p className="text-sm text-text-secondary">Games & tournaments</p>
+              </Link>
+
+              <Link to="/events?category=arts" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
+                <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="font-medium text-text mb-1">Arts & Culture</h3>
+                <p className="text-sm text-text-secondary">Exhibitions & theater</p>
+              </Link>
+
+              <Link to="/events?category=workshop" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
+                <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="font-medium text-text mb-1">Workshops</h3>
+                <p className="text-sm text-text-secondary">Learn something new</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Auth Modal */}
         <AuthModal
             isOpen={isAuthModalOpen}
             onClose={() => setIsAuthModalOpen(false)}

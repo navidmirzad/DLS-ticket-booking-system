@@ -1,3 +1,4 @@
+// src/pages/BookingPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
@@ -14,9 +15,9 @@ import {
 import { motion } from 'framer-motion';
 import {
   getEventById,
-  Event,
-  TicketType,
-  getTicketTypesForEvent
+  getTicketTypesForEvent,
+  SimpleEvent,
+  TicketType
 } from '../services/api';
 import { formatShortDate, formatTime } from '../utils/dateUtils';
 
@@ -49,10 +50,10 @@ const BookingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1', 10);
-  const ticketTypeId = searchParams.get('ticketType') || 'general';
+  const ticketTypeId = searchParams.get('ticketType') || '';
 
   // State for the event data, ticket types, loading, and error handling
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<SimpleEvent | null>(null);
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
   const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,9 +159,12 @@ const BookingPage: React.FC = () => {
       navigate('/checkout', {
         state: {
           eventId: id,
-          selectedTicketType: selectedTicketType, // Pass the full ticket type object
+          selectedTicketType: selectedTicketType,
           ticketCount,
-          userInfo: formData
+          userInfo: {
+            ...formData,
+            name: `${formData.firstName} ${formData.lastName}`
+          }
         }
       });
     }
@@ -198,7 +202,7 @@ const BookingPage: React.FC = () => {
   const total = subtotal + serviceFee;
 
   // Default image if none is provided
-  const defaultImage = 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
+  const defaultImage = event.image || 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
 
   return (
       <div className="bg-primary py-12">
@@ -302,7 +306,7 @@ const BookingPage: React.FC = () => {
                             type="tel"
                             id="phone"
                             name="phone"
-                            className={`input pl-10 ${errors.phone ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                            className={`input pl-8 ${errors.phone ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                             placeholder="+1 (123) 456-7890"
                             value={formData.phone}
                             onChange={handleChange}

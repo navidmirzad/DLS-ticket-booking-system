@@ -1,4 +1,4 @@
-import Event from '../models/Event.js';
+import Event from "../models/Event.js";
 import { publishEvent } from "../util/rabbitmq.js";
 
 const getEvents = async () => {
@@ -22,27 +22,32 @@ const getEvents = async () => {
 const getEvent = async (eventId) => {
   try {
     const connection = await Event.getConnection();
-    
-    const [rows] = await connection.query(`
+
+    const [rows] = await connection.query(
+      `
       SELECT e.*, ed.*, t.id as ticket_id, t.price, t.type
       FROM EVENT e
       JOIN EVENT_DESCRIPTION ed ON e.description_id = ed.id
       LEFT JOIN TICKETS t ON e.id = t.event_id
       WHERE e.id = ? AND e.deleted_at IS NULL
-    `, [eventId]);
-    
+    `,
+      [eventId]
+    );
+
     await connection.end();
-    
+
     if (rows.length === 0) {
       return null;
     }
 
     const event = rows[0];
-    event.tickets = rows.map(row => ({
-      id: row.ticket_id,
-      price: row.price,
-      type: row.type
-    })).filter(ticket => ticket.id != null);
+    event.tickets = rows
+      .map((row) => ({
+        id: row.ticket_id,
+        price: row.price,
+        type: row.type,
+      }))
+      .filter((ticket) => ticket.id != null);
 
     return event;
   } catch (error) {
@@ -57,22 +62,31 @@ const createEvent = async (eventData) => {
     await connection.beginTransaction();
 
     const [descResult] = await connection.query(
-      'INSERT INTO EVENT_DESCRIPTION (title, image, date, description, location) VALUES (?, ?, ?, ?, ?)',
-      [eventData.title, eventData.image, eventData.date, eventData.description, eventData.location]
+      "INSERT INTO EVENT_DESCRIPTION (title, image, capacity, date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        eventData.title,
+        eventData.image,
+        eventData.capacity,
+        eventData.date,
+        eventData.description,
+        eventData.location,
+      ]
     );
-    
+
     const [eventResult] = await connection.query(
-      'INSERT INTO EVENT (description_id, tickets_available) VALUES (?, ?)',
+      "INSERT INTO EVENT (description_id, tickets_available) VALUES (?, ?)",
       [descResult.insertId, true]
     );
 
     if (eventData.tickets && eventData.tickets.length > 0) {
-      const ticketValues = eventData.tickets.map(ticket => 
-        [eventResult.insertId, ticket.price, ticket.type]
-      );
-      
+      const ticketValues = eventData.tickets.map((ticket) => [
+        eventResult.insertId,
+        ticket.price,
+        ticket.type,
+      ]);
+
       await connection.query(
-        'INSERT INTO TICKETS (event_id, price, type) VALUES ?',
+        "INSERT INTO TICKETS (event_id, price, type) VALUES ?",
         [ticketValues]
       );
     }
@@ -81,7 +95,7 @@ const createEvent = async (eventData) => {
 
     // Get the event and publish after committing the transaction
     const newEvent = await getEvent(eventResult.insertId);
-    
+
     if (newEvent) {
       await publishEvent({
         type: "EventCreated",
@@ -105,12 +119,12 @@ const updateEvent = async (eventId, eventData) => {
     await connection.beginTransaction();
 
     const [eventRows] = await connection.query(
-      'SELECT description_id FROM EVENT WHERE id = ? AND deleted_at IS NULL',
+      "SELECT description_id FROM EVENT WHERE id = ? AND deleted_at IS NULL",
       [eventId]
     );
 
     if (eventRows.length === 0) {
-      throw new Error('Event not found');
+      throw new Error("Event not found");
     }
 
     const descriptionId = eventRows[0].description_id;
@@ -120,36 +134,46 @@ const updateEvent = async (eventId, eventData) => {
        SET title = ?, image = ?, date = ?, 
            description = ?, location = ?
        WHERE id = ?`,
-      [eventData.title, eventData.image, eventData.date, 
-       eventData.description, eventData.location, descriptionId]
+      [
+        eventData.title,
+        eventData.image,
+        eventData.date,
+        eventData.description,
+        eventData.location,
+        descriptionId,
+      ]
     );
 
     if (eventData.tickets_available !== undefined) {
       await connection.query(
-        'UPDATE EVENT SET tickets_available = ? WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE EVENT SET tickets_available = ? WHERE id = ? AND deleted_at IS NULL",
         [eventData.tickets_available, eventId]
       );
     }
 
     if (eventData.tickets) {
-      await connection.query('DELETE FROM TICKETS WHERE event_id = ?', [eventId]);
-      
+      await connection.query("DELETE FROM TICKETS WHERE event_id = ?", [
+        eventId,
+      ]);
+
       if (eventData.tickets.length > 0) {
-        const ticketValues = eventData.tickets.map(ticket => 
-          [eventId, ticket.price, ticket.type]
-        );
-        
+        const ticketValues = eventData.tickets.map((ticket) => [
+          eventId,
+          ticket.price,
+          ticket.type,
+        ]);
+
         await connection.query(
-          'INSERT INTO TICKETS (event_id, price, type) VALUES ?',
+          "INSERT INTO TICKETS (event_id, price, type) VALUES ?",
           [ticketValues]
         );
       }
     }
 
     await connection.commit();
-    
+
     const updatedEvent = await getEvent(eventId);
-    
+
     // Publish the event to RabbitMQ
     await publishEvent({
       type: "EventUpdated",
@@ -173,14 +197,14 @@ const deleteEvent = async (eventId) => {
 
     // Get the event before deletion for publishing
     const eventToDelete = await getEvent(eventId);
-    
+
     if (!eventToDelete) {
-      throw new Error('Event not found');
+      throw new Error("Event not found");
     }
 
     // Soft delete the event
     await connection.query(
-      'UPDATE EVENT SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL',
+      "UPDATE EVENT SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
       [eventId]
     );
 
@@ -189,7 +213,7 @@ const deleteEvent = async (eventId) => {
     // Publish the event deletion
     await publishEvent({
       type: "EventDeleted",
-      payload: eventToDelete
+      payload: eventToDelete,
     });
 
     return eventToDelete;
@@ -207,10 +231,9 @@ const restoreEvent = async (eventId) => {
   try {
     await connection.beginTransaction();
 
-    await connection.query(
-      'UPDATE EVENT SET deleted_at = NULL WHERE id = ?',
-      [eventId]
-    );
+    await connection.query("UPDATE EVENT SET deleted_at = NULL WHERE id = ?", [
+      eventId,
+    ]);
 
     await connection.commit();
     return await getEvent(eventId);
@@ -223,4 +246,11 @@ const restoreEvent = async (eventId) => {
   }
 };
 
-export { getEvents, getEvent, createEvent, updateEvent, deleteEvent, restoreEvent };
+export {
+  getEvents,
+  getEvent,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  restoreEvent,
+};
