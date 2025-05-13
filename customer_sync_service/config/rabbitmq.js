@@ -21,21 +21,21 @@ export const consume = async() => {
         const content = JSON.parse(msg.content.toString());
         console.log("MSG: ", content);
         // CREATE THE EVENT
-        createEvent(content);
+        await createEvent(content.payload);
     });
 
     channel.consume("eventDeleted", async (msg) => {
         const content = JSON.parse(msg.content.toString());
         console.log("MSG: ", content);
         // DELETE THE EVENT
-        await deleteEvent(content);
+        await deleteEvent(content.payload);
     });
 
     channel.consume("eventUpdated", async (msg) => {
         const content = JSON.parse(msg.content.toString());
         console.log("MSG: ", content);
         // UPDATE EVENT
-        updateEvent(content);
+        await updateEvent(content.payload);
     });
 
     
