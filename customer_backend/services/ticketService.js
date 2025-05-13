@@ -4,7 +4,7 @@ import {
   decreaseCapacity,
   getEventByID,
 } from "./eventService.js";
-import { sendToQueue } from "../util/rabbitmq.js";
+import { sendToQueue, sendTicketToQueue } from "../util/rabbitmq.js";
 import { v4 as uuidv4 } from "uuid";
 
 export const getTicketsByUserID = async (userId) => {
@@ -16,7 +16,7 @@ export const getTicketByID = async (ticketId) => {
 };
 
 export const createTicket = async (eventId, userId, email, quantity) => {
-  const event = await getEventByID(eventId); // Make sure this function correctly fetches events
+  const event = await getEventByID(eventId);
 
   if (!event) {
     throw new Error("Event not found");
@@ -25,10 +25,10 @@ export const createTicket = async (eventId, userId, email, quantity) => {
   const createdIndividualTickets = []; // To store full ticket documents for notifications
   const ticketsForOrder = []; // To store ticket objects for the Order document
   let totalPrice = 0;
-  
+
   // Get total quantity of tickets from all items
   const ticketPrice = 50; // Fixed price for all tickets
-  
+
   // Create all tickets
   for (let i = 0; i < quantity; i++) {
     const newTicket = new Ticket({
@@ -40,11 +40,11 @@ export const createTicket = async (eventId, userId, email, quantity) => {
     await decreaseCapacity(eventId);
     const savedTicket = await newTicket.save();
     createdIndividualTickets.push(savedTicket);
-    
+
     // Create properly structured ticket for Order
     ticketsForOrder.push({
       ticket_id: savedTicket.ticket_id,
-      quantity: 1
+      quantity: 1,
     });
   }
 
@@ -60,10 +60,9 @@ export const createTicket = async (eventId, userId, email, quantity) => {
 
   await order.save();
 
-
   // Send notifications for all tickets
   for (const ticket of createdIndividualTickets) {
-    await sendToQueue({
+    const ticketData = {
       type: "TICKET_BOUGHT",
       to: email,
       id: ticket._id,
@@ -78,7 +77,9 @@ export const createTicket = async (eventId, userId, email, quantity) => {
         location: event.location,
         description: event.description,
       },
-    });
+    };
+    await sendToQueue(ticketData);
+    await sendTicketToQueue(ticketData);
   }
 
   return {

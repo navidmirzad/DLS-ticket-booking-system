@@ -23,6 +23,7 @@ export const connectRabbit = async () => {
   const conn = await amqp.connect(process.env.RABBITMQ_URL);
   channel = await conn.createChannel();
   await channel.assertQueue("eventQueue"); // Ensure the queue exists
+  await channel.assertQueue("ticketQueue"); // Ensure the ticketQueue exists
   await channel.assertQueue("emailQueue"); // Ensure the emailQueue exists
   console.log("RabbitMQ connected and queues asserted.");
 };
@@ -30,6 +31,11 @@ export const connectRabbit = async () => {
 export const sendToQueue = async (data) => {
   if (!channel) throw new Error("RabbitMQ channel not initialized");
   channel.sendToQueue("emailQueue", Buffer.from(JSON.stringify(data)));
+};
+
+export const sendTicketToQueue = async (data) => {
+  if (!channel) throw new Error("RabbitMQ channel not initialized");
+  channel.sendToQueue("ticketQueue", Buffer.from(JSON.stringify(data)));
 };
 
 export const consumeQueue = async () => {
