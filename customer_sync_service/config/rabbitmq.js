@@ -18,26 +18,43 @@ export const consume = async() => {
     }
     
     channel.consume("eventCreated", async (msg) => {
-        const content = JSON.parse(msg.content.toString());
-        console.log("MSG: ", content);
-        // CREATE THE EVENT
-        await createEvent(content.payload);
+        if(msg) {
+            try {
+                const content = JSON.parse(msg.content.toString());
+                console.log("MSG: ", content);
+                await createEvent(content.payload);
+                channel.ack(msg)
+            } catch(error) {
+                console.error("Event created error: ", error);
+            }
+        }
+        
     });
 
     channel.consume("eventDeleted", async (msg) => {
-        const content = JSON.parse(msg.content.toString());
-        console.log("MSG: ", content);
-        // DELETE THE EVENT
-        await deleteEvent(content.payload);
+        if(msg) {
+            try {
+                const content = JSON.parse(msg.content.toString());
+                console.log("MSG: ", content);
+                await deleteEvent(content.payload);
+                channel.ack(msg)
+            } catch(error) {
+                console.error("Event deleted error: ", error);
+            }
+        }
     });
 
     channel.consume("eventUpdated", async (msg) => {
-        const content = JSON.parse(msg.content.toString());
-        console.log("MSG: ", content);
-        // UPDATE EVENT
-        await updateEvent(content.payload);
+        if(msg) {
+            try {
+                const content = JSON.parse(msg.content.toString());
+                console.log("MSG: ", content);
+                await updateEvent(content.payload);
+                channel.ack(msg)
+            } catch(error) {
+                console.error("Event created error: ", error);
+            }
+        }
     });
-
-    
 
 }

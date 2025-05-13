@@ -58,6 +58,10 @@ const EventSchema = new Schema({
     type: String,
     required: true,
   },
+  capacity: {
+    type: Number,
+    required: true,
+  }
 });
 
 // EVENT_DESCRIPTION model
