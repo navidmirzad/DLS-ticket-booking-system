@@ -1,3 +1,7 @@
+/**
+ * Admin backend main application
+ * @module app
+ */
 import dotenv from "dotenv";
 import express from "express";
 import { connectRabbit } from "./util/rabbitmq.js";
@@ -7,10 +11,17 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpecs from "./util/swagger.js";
 
+/**
+ * Express application instance
+ * @type {Object}
+ */
 const app = express();
 
 dotenv.config();
 
+/**
+ * Configure CORS middleware
+ */
 app.use(
   cors({
     origin: [
@@ -21,8 +32,14 @@ app.use(
   })
 );
 
+/**
+ * Configure request body parsing middleware
+ */
 app.use(express.json());
 
+/**
+ * Initialize services: RabbitMQ and Database
+ */
 try {
   await connectRabbit(); // Connect to RabbitMQ
   console.log("RabbitMQ connected ✅");
@@ -36,10 +53,17 @@ try {
 
 import eventRoutes from "./routes/event.js";
 import adminRoutes from "./routes/admin.js";
+
+/**
+ * Configure API routes
+ */
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use(eventRoutes);
 app.use(adminRoutes);
 
+/**
+ * Start the server
+ */
 const PORT = process.env.ADMIN_BACKEND_PORT || 3001;
 app.listen(PORT, () => {
   console.log("Admin backend is running on PORT: ", PORT);

@@ -2,6 +2,10 @@ import express from "express";
 import {getEvents, getEvent, createEvent, updateEvent, deleteEvent} from '../services/eventService.js';
 import {isAuthenticated} from '../middleware/auth.js';
 
+/**
+ * Express router for event API endpoints
+ * @module routes/event
+ */
 const router = express.Router();
 
 /**
@@ -61,6 +65,15 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
+/**
+ * Get all events with their descriptions
+ * @name GET /api/admin/events
+ * @function
+ * @memberof module:routes/event
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with array of events
+ */
 router.get("/api/admin/events", isAuthenticated, async (req, res) => {
     try {
       const events = await getEvents();
@@ -99,6 +112,17 @@ router.get("/api/admin/events", isAuthenticated, async (req, res) => {
  *         description: Event not found
  *       500:
  *         description: Server error
+ */
+/**
+ * Get a specific event by ID with its description and tickets
+ * @name GET /api/admin/events/:id
+ * @function
+ * @memberof module:routes/event
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request path parameters
+ * @param {string} req.params.id - Event ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with event details or error
  */
 router.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
     try {
@@ -161,6 +185,16 @@ router.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
  *                   $ref: '#/components/schemas/Event'
  *       500:
  *         description: Server error
+ */
+/**
+ * Create a new event with description and tickets
+ * @name POST /api/admin/events
+ * @function
+ * @memberof module:routes/event
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing event data
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with created event or error
  */
 router.post("/api/admin/events", isAuthenticated, async (req, res) => {
     try {
@@ -226,6 +260,18 @@ router.post("/api/admin/events", isAuthenticated, async (req, res) => {
  *       500:
  *         description: Server error
  */
+/**
+ * Update an existing event, its description and tickets
+ * @name PATCH /api/admin/events/:id
+ * @function
+ * @memberof module:routes/event
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request path parameters
+ * @param {string} req.params.id - Event ID
+ * @param {Object} req.body - Request body containing event data to update
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with updated event or error
+ */
 router.patch("/api/admin/events/:id", isAuthenticated, async (req, res) => {
     try {
       const eventId = req.params.id;
@@ -263,6 +309,17 @@ router.patch("/api/admin/events/:id", isAuthenticated, async (req, res) => {
  *         description: Event not found
  *       500:
  *         description: Server error
+ */
+/**
+ * Delete an event, its description and associated tickets
+ * @name DELETE /api/admin/events/:id
+ * @function
+ * @memberof module:routes/event
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request path parameters
+ * @param {string} req.params.id - Event ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
  */
 router.delete("/api/admin/events/:id", isAuthenticated, async (req, res) => {
     try {

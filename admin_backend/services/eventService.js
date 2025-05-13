@@ -1,6 +1,12 @@
 import Event from "../models/Event.js";
 import { publishEvent } from "../util/rabbitmq.js";
 
+/**
+ * Retrieves all non-deleted events from the database
+ * @async
+ * @returns {Promise<Array>} Array of event objects ordered by date
+ * @throws {Error} If there's an error fetching events
+ */
 const getEvents = async () => {
   try {
     const connection = await Event.getConnection();
@@ -19,6 +25,13 @@ const getEvents = async () => {
   }
 };
 
+/**
+ * Retrieves a specific event by ID including its tickets
+ * @async
+ * @param {number} eventId - The ID of the event to retrieve
+ * @returns {Promise<Object|null>} Event object with tickets property or null if not found
+ * @throws {Error} If there's an error fetching the event
+ */
 const getEvent = async (eventId) => {
   try {
     const connection = await Event.getConnection();
@@ -56,6 +69,22 @@ const getEvent = async (eventId) => {
   }
 };
 
+/**
+ * Creates a new event with its description and tickets
+ * @async
+ * @param {Object} eventData - Data for the new event
+ * @param {string} eventData.title - Event title
+ * @param {string} eventData.image - URL or path to the event image
+ * @param {number} eventData.capacity - Maximum capacity for the event
+ * @param {string} eventData.date - Date of the event
+ * @param {string} eventData.description - Description of the event
+ * @param {string} eventData.location - Location of the event
+ * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
+ * @param {number} [eventData.tickets[].price] - Price of the ticket
+ * @param {string} [eventData.tickets[].type] - Type of the ticket
+ * @returns {Promise<Object>} The newly created event
+ * @throws {Error} If there's an error creating the event
+ */
 const createEvent = async (eventData) => {
   const connection = await Event.getConnection();
   try {
@@ -113,6 +142,21 @@ const createEvent = async (eventData) => {
   }
 };
 
+/**
+ * Updates an existing event and its associated data
+ * @async
+ * @param {number} eventId - The ID of the event to update
+ * @param {Object} eventData - Updated event data
+ * @param {string} [eventData.title] - Event title
+ * @param {string} [eventData.image] - URL or path to the event image
+ * @param {string} [eventData.date] - Date of the event
+ * @param {string} [eventData.description] - Description of the event
+ * @param {string} [eventData.location] - Location of the event
+ * @param {boolean} [eventData.tickets_available] - Whether tickets are available for this event
+ * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
+ * @returns {Promise<Object>} The updated event
+ * @throws {Error} If event not found or there's an error updating the event
+ */
 const updateEvent = async (eventId, eventData) => {
   const connection = await Event.getConnection();
   try {
@@ -190,6 +234,13 @@ const updateEvent = async (eventId, eventData) => {
   }
 };
 
+/**
+ * Soft deletes an event by setting its deleted_at timestamp
+ * @async
+ * @param {number} eventId - The ID of the event to delete
+ * @returns {Promise<Object>} The deleted event object
+ * @throws {Error} If event not found or there's an error during deletion
+ */
 const deleteEvent = async (eventId) => {
   const connection = await Event.getConnection();
   try {
@@ -226,6 +277,13 @@ const deleteEvent = async (eventId) => {
   }
 };
 
+/**
+ * Restores a previously deleted event by clearing its deleted_at field
+ * @async
+ * @param {number} eventId - The ID of the event to restore
+ * @returns {Promise<Object>} The restored event object
+ * @throws {Error} If there's an error restoring the event
+ */
 const restoreEvent = async (eventId) => {
   const connection = await Event.getConnection();
   try {
