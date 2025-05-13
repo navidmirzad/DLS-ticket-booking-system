@@ -1,19 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from 'cors';
+import cors from "cors";
 import connectMongo from "./db/mongo.js";
-import { seedMongo } from "./db/seed.js";
 
 const app = express();
 dotenv.config();
 
-app.use(cors({
-  origin: 'http://localhost:8080',  // Ensure this matches your frontend URL
-}));
+app.use(
+  cors({
+    origin: "http://localhost:8080", // Ensure this matches your frontend URL
+  })
+);
 
 await connectMongo();
-await seedMongo();
-console.log('RABBITMQ_URL:', process.env.RABBITMQ_URL);
+console.log("RABBITMQ_URL:", process.env.RABBITMQ_URL);
 app.use(express.json());
 
 import ticketRouter from "./routes/ticketRouter.js";
@@ -22,7 +22,7 @@ app.use(ticketRouter);
 import eventRouter from "./routes/eventRouter.js";
 app.use(eventRouter);
 
-import { connectRabbit, consumeQueue } from './util/rabbitmq.js';
+import { connectRabbit, consumeQueue } from "./util/rabbitmq.js";
 await connectRabbit();
 await consumeQueue();
 

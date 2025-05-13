@@ -6,6 +6,7 @@ import createDatabase from "./database/init_database.js";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpecs from "./util/swagger.js";
+import { seedMySQL } from "./database/seedMySQL.js";
 
 const app = express();
 
@@ -29,6 +30,9 @@ try {
 
   await createDatabase(); // Initialize the database
   console.log("Database initialized ✅");
+
+  await seedMySQL(); // Seed the database
+  console.log("Database seeded ✅");
 } catch (error) {
   console.error("Error initializing services:", error);
   process.exit(1); // Exit if initialization fails
