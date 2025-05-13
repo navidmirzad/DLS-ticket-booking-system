@@ -9,13 +9,16 @@ const eventSchema = new mongoose.Schema({
   capacity: Number,
   created_at: Date,
   tickets_available: Number,
+});
+
+/* 
   tickets: [
     {
       price: Number,
       type: String,
     },
   ],
-});
+*/
 
 const Event = mongoose.model("Event", eventSchema);
 export default Event;

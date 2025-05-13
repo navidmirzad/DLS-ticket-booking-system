@@ -7,19 +7,20 @@ export interface BaseModel {
   deleted_at: string | null; // Tombstone pattern - null if not deleted
 }
 
-export interface EventDescription {
-  event_desc_id: string;
-  event_name: string;
-  event_image: string;
-  event_date: string;
-  event_description: string;
-  event_location: string;
-}
+/* export interface EventDescription {
+  
+} */
 
 export interface Event extends BaseModel {
-  event_id: string;
-  event_description: EventDescription | string; // Could be the ID or the embedded object
   tickets_available: number;
+  id: string;
+  name: string;
+  price: number;
+  capacity: number;
+  image: string;
+  date: string;
+  description: string;
+  location: string;
 }
 
 export interface Ticket extends BaseModel {

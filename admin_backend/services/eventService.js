@@ -62,10 +62,11 @@ const createEvent = async (eventData) => {
     await connection.beginTransaction();
 
     const [descResult] = await connection.query(
-      "INSERT INTO EVENT_DESCRIPTION (title, image, date, description, location) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO EVENT_DESCRIPTION (title, image, capacity, date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
       [
         eventData.title,
         eventData.image,
+        eventData.capacity,
         eventData.date,
         eventData.description,
         eventData.location,

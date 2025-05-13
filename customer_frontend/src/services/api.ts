@@ -22,16 +22,13 @@ api.interceptors.request.use((config) => {
 // Event interface based on MongoDB model
 export interface Event {
   _id: string;
-  event_id: string;
+  id: string;
   tickets_available: number;
-  event_description: {
-    event_desc_id: string;
-    event_name: string;
-    event_image?: string;
-    event_date: string;
-    event_description: string;
-    event_location: string;
-  };
+  title: string;
+  image?: string;
+  date: string;
+  description: string;
+  location: string;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
@@ -116,12 +113,12 @@ interface ApiResponse<T> {
 const mapEventToSimpleEvent = (event: Event): SimpleEvent => {
   return {
     _id: event._id,
-    title: event.event_description.event_name,
-    description: event.event_description.event_description,
-    location: event.event_description.event_location,
-    date: event.event_description.event_date,
+    title: event.title,
+    description: event.description,
+    location: event.location,
+    date: event.date,
     capacity: event.tickets_available,
-    image: event.event_description.event_image,
+    image: event.image,
     created_at: event.created_at
   };
 };
@@ -267,7 +264,7 @@ export const getTicketsByUserId = async (userId: string): Promise<Order[]> => {
     if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
       return response.data.data;
     } else if (Array.isArray(response.data)) {
-      return response.data as Ticket[];
+      return response.data;
     } else {
       console.error('Invalid tickets data structure:', response.data);
       throw new Error('Invalid tickets data structure');

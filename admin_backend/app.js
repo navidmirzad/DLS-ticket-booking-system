@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import express from "express";
 import { connectRabbit } from "./util/rabbitmq.js";
-import { isAuthenticated } from "./middleware/auth.js";
+/* import { isAuthenticated } from "./middleware/auth.js"; */
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
-import swaggerUi from 'swagger-ui-express';
-import swaggerSpecs from './util/swagger.js';
+import swaggerUi from "swagger-ui-express";
+import swaggerSpecs from "./util/swagger.js";
 
 const app = express();
 
@@ -36,12 +36,14 @@ try {
 
 import eventRoutes from "./routes/event.js";
 import adminRoutes from "./routes/admin.js";
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use(eventRoutes);
 app.use(adminRoutes);
 
 const PORT = process.env.ADMIN_BACKEND_PORT || 3001;
 app.listen(PORT, () => {
   console.log("Admin backend is running on PORT: ", PORT);
-  console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+  console.log(
+    `Swagger documentation available at http://localhost:${PORT}/api-docs`
+  );
 });

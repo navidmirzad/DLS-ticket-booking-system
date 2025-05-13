@@ -1,16 +1,30 @@
 import amqp from "amqplib";
 import dotenv from "dotenv";
-import {Event} from "../models/mongo/index.js"; // Import the Event model
+import { Event } from "../models/mongo/index.js"; // Import the Event model
+import mongoose from "mongoose"; // Add this for MongoDB connection check
 
 dotenv.config();
 let channel;
 
+// Ensure MongoDB is connected before consuming messages
+const ensureMongoConnected = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    console.log("MongoDB not connected. Connecting...");
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected.");
+  }
+};
+
 export const connectRabbit = async () => {
-  console.log(process.env.RABBITMQ_URL);
+  console.log("Connecting to RabbitMQ:", process.env.RABBITMQ_URL);
   const conn = await amqp.connect(process.env.RABBITMQ_URL);
   channel = await conn.createChannel();
   await channel.assertQueue("eventQueue"); // Ensure the queue exists
   await channel.assertQueue("emailQueue"); // Ensure the emailQueue exists
+  console.log("RabbitMQ connected and queues asserted.");
 };
 
 export const sendToQueue = async (data) => {
@@ -20,6 +34,8 @@ export const sendToQueue = async (data) => {
 
 export const consumeQueue = async () => {
   if (!channel) throw new Error("RabbitMQ channel not initialized");
+
+  await ensureMongoConnected();
 
   await channel.consume(
     "eventQueue",
@@ -31,14 +47,26 @@ export const consumeQueue = async () => {
         // Handle event (e.g., save to MongoDB)
         if (event.type === "EventCreated") {
           const { payload } = event;
+          console.log("Saving event to MongoDB. Payload:", payload);
           try {
-            await Event.create(payload); // Save the event to MongoDB
+            const saved = await Event.create(payload); // Save the event to MongoDB
+            console.log("Event saved to MongoDB:", saved);
           } catch (error) {
-            console.error("Error saving event to MongoDB:", error);
+            console.error(
+              "Error saving event to MongoDB:",
+              error,
+              "Payload:",
+              payload
+            );
           }
+        } else {
+          console.log("Unknown event type:", event.type);
         }
+      } else {
+        console.log("Received null message from eventQueue.");
       }
     },
     { noAck: true }
   );
+  console.log("RabbitMQ consumer started for eventQueue.");
 };

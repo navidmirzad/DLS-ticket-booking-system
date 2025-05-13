@@ -17,70 +17,95 @@ export const seedMongo = async () => {
     await User.deleteMany({});
 
     // Create event descriptions
-    const eventDescriptions = await EventDescription.insertMany([
+    /* const eventDescriptions = await EventDescription.insertMany([
       {
-        event_desc_id: uuidv4(),
-        event_name: "Summer Music Festival",
-        event_image:
+        id: uuidv4(),
+        title: "Summer Music Festival",
+        image:
           "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg",
-        event_date: new Date("2025-07-15"),
-        event_description:
+        date: new Date("2025-07-15"),
+        description:
           "A fantastic music festival featuring top artists from around the world.",
-        event_location: "Central Park, New York",
+        location: "Central Park, New York",
       },
       {
-        event_desc_id: uuidv4(),
-        event_name: "Tech Conference 2025",
-        event_image:
+        id: uuidv4(),
+        title: "Tech Conference 2025",
+        image:
           "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg",
-        event_date: new Date("2025-09-20"),
-        event_description:
+        date: new Date("2025-09-20"),
+        description:
           "The biggest tech conference of the year with keynotes from industry leaders.",
-        event_location: "Convention Center, San Francisco",
+        location: "Convention Center, San Francisco",
       },
       {
-        event_desc_id: uuidv4(),
-        event_name: "Food & Wine Expo",
-        event_image:
+        id: uuidv4(),
+        title: "Food & Wine Expo",
+        image:
           "https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg",
-        event_date: new Date("2025-08-05"),
-        event_description:
+        date: new Date("2025-08-05"),
+        description:
           "Taste incredible dishes and wines from renowned chefs and sommeliers.",
-        event_location: "Exhibition Hall, Chicago",
+        location: "Exhibition Hall, Chicago",
       },
       {
-        event_desc_id: uuidv4(),
-        event_name: "Sports Championship",
-        event_image:
+        id: uuidv4(),
+        title: "Sports Championship",
+        image:
           "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg",
-        event_date: new Date("2025-10-12"),
-        event_description:
+        date: new Date("2025-10-12"),
+        description:
           "The final championship game of the season featuring top teams.",
-        event_location: "Stadium Arena, Dallas",
+        location: "Stadium Arena, Dallas",
       },
     ]);
+ */
 
     // Create events
     const events = await Event.insertMany([
       {
-        event_id: uuidv4(),
+        id: uuidv4(),
         tickets_available: 500,
-        event_description: eventDescriptions[0]._id,
+        title: "Summer Music Festival",
+        image:
+          "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg",
+        date: new Date("2025-07-15"),
+        description:
+          "A fantastic music festival featuring top artists from around the world.",
+        location: "Central Park, New York",
       },
       {
-        event_id: uuidv4(),
+        id: uuidv4(),
         tickets_available: 1000,
-        event_description: eventDescriptions[1]._id,
+        title: "Tech Conference 2025",
+        image:
+          "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg",
+        date: new Date("2025-09-20"),
+        description:
+          "The biggest tech conference of the year with keynotes from industry leaders.",
+        location: "Convention Center, San Francisco",
       },
       {
-        event_id: uuidv4(),
+        id: uuidv4(),
         tickets_available: 300,
-        event_description: eventDescriptions[2]._id,
+        title: "Food & Wine Expo",
+        image:
+          "https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg",
+        date: new Date("2025-08-05"),
+        description:
+          "Taste incredible dishes and wines from renowned chefs and sommeliers.",
+        location: "Exhibition Hall, Chicago",
       },
       {
-        event_id: uuidv4(),
+        id: uuidv4(),
         tickets_available: 5000,
-        event_description: eventDescriptions[3]._id,
+        title: "Sports Championship",
+        image:
+          "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg",
+        date: new Date("2025-10-12"),
+        description:
+          "The final championship game of the season featuring top teams.",
+        location: "Stadium Arena, Dallas",
       },
     ]);
 
@@ -106,19 +131,19 @@ export const seedMongo = async () => {
     const tickets = await Ticket.insertMany([
       {
         ticket_id: uuidv4(),
-        event_id: events[0].event_id,
+        event_id: events[0].event.id,
         ticket_price: 99.99,
         ticket_type: "STANDARD",
       },
       {
         ticket_id: uuidv4(),
-        event_id: events[0].event_id,
+        event_id: events[0].event.id,
         ticket_price: 199.99,
         ticket_type: "VIP",
       },
       {
         ticket_id: uuidv4(),
-        event_id: events[1].event_id,
+        event_id: events[1].event.id,
         ticket_price: 149.99,
         ticket_type: "EARLY_BIRD",
       },

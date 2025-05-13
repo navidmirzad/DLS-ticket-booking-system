@@ -27,7 +27,7 @@ const BaseSchema = new Schema(
 
 // EVENT model - now extends the BaseSchema
 const EventSchema = new Schema({
-  event_id: {
+  id: {
     type: String,
     required: true,
     unique: true,
@@ -38,41 +38,30 @@ const EventSchema = new Schema({
     default: 0,
     min: 0,
   },
-  event_description: {
-    type: Schema.Types.ObjectId,
-    ref: "EventDescription",
+  title: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+    required: false,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
     required: true,
   },
 });
 
 // EVENT_DESCRIPTION model
-const EventDescriptionSchema = new Schema({
-  event_desc_id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  event_name: {
-    type: String,
-    required: true,
-  },
-  event_image: {
-    type: String,
-    required: false,
-  },
-  event_date: {
-    type: Date,
-    required: true,
-  },
-  event_description: {
-    type: String,
-    required: true,
-  },
-  event_location: {
-    type: String,
-    required: true,
-  },
-});
+const EventDescriptionSchema = new Schema({});
 
 // TICKETS model
 const TicketSchema = new Schema({
@@ -112,8 +101,16 @@ const OrderSchema = new Schema({
   },
   tickets_bought: [
     {
-      type: String,
-      ref: "Ticket",
+      ticket_id: {
+        type: String,
+        required: true,
+        ref: "Ticket",
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
     },
   ],
   total_price: {
