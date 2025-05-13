@@ -1,10 +1,38 @@
-import Event from "../models/Event.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/eventService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/eventService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Event from "../models/Event.js";
 import { publishEvent } from "../util/rabbitmq.js";
 
 /**
  * Retrieves all non-deleted events from the database
  * @async
- * @returns {Promise<Array>} Array of event objects ordered by date
+ * @returns {Promise&lt;Array>} Array of event objects ordered by date
  * @throws {Error} If there's an error fetching events
  */
 const getEvents = async () => {
@@ -29,7 +57,7 @@ const getEvents = async () => {
  * Retrieves a specific event by ID including its tickets
  * @async
  * @param {number} eventId - The ID of the event to retrieve
- * @returns {Promise<Object|null>} Event object with tickets property or null if not found
+ * @returns {Promise&lt;Object|null>} Event object with tickets property or null if not found
  * @throws {Error} If there's an error fetching the event
  */
 const getEvent = async (eventId) => {
@@ -79,10 +107,10 @@ const getEvent = async (eventId) => {
  * @param {string} eventData.date - Date of the event
  * @param {string} eventData.description - Description of the event
  * @param {string} eventData.location - Location of the event
- * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
+ * @param {Array&lt;Object>} [eventData.tickets] - Array of ticket objects
  * @param {number} [eventData.tickets[].price] - Price of the ticket
  * @param {string} [eventData.tickets[].type] - Type of the ticket
- * @returns {Promise<Object>} The newly created event
+ * @returns {Promise&lt;Object>} The newly created event
  * @throws {Error} If there's an error creating the event
  */
 const createEvent = async (eventData) => {
@@ -107,7 +135,7 @@ const createEvent = async (eventData) => {
       [descResult.insertId, true]
     );
 
-    if (eventData.tickets && eventData.tickets.length > 0) {
+    if (eventData.tickets &amp;&amp; eventData.tickets.length > 0) {
       const ticketValues = eventData.tickets.map((ticket) => [
         eventResult.insertId,
         ticket.price,
@@ -153,8 +181,8 @@ const createEvent = async (eventData) => {
  * @param {string} [eventData.description] - Description of the event
  * @param {string} [eventData.location] - Location of the event
  * @param {boolean} [eventData.tickets_available] - Whether tickets are available for this event
- * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
- * @returns {Promise<Object>} The updated event
+ * @param {Array&lt;Object>} [eventData.tickets] - Array of ticket objects
+ * @returns {Promise&lt;Object>} The updated event
  * @throws {Error} If event not found or there's an error updating the event
  */
 const updateEvent = async (eventId, eventData) => {
@@ -238,7 +266,7 @@ const updateEvent = async (eventId, eventData) => {
  * Soft deletes an event by setting its deleted_at timestamp
  * @async
  * @param {number} eventId - The ID of the event to delete
- * @returns {Promise<Object>} The deleted event object
+ * @returns {Promise&lt;Object>} The deleted event object
  * @throws {Error} If event not found or there's an error during deletion
  */
 const deleteEvent = async (eventId) => {
@@ -281,7 +309,7 @@ const deleteEvent = async (eventId) => {
  * Restores a previously deleted event by clearing its deleted_at field
  * @async
  * @param {number} eventId - The ID of the event to restore
- * @returns {Promise<Object>} The restored event object
+ * @returns {Promise&lt;Object>} The restored event object
  * @throws {Error} If there's an error restoring the event
  */
 const restoreEvent = async (eventId) => {
@@ -312,3 +340,26 @@ export {
   deleteEvent,
   restoreEvent,
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-routes_admin.html">routes/admin</a></li><li><a href="module-routes_event.html">routes/event</a></li></ul><h3>Classes</h3><ul><li><a href="Event.html">Event</a></li><li><a href="EventDescription.html">EventDescription</a></li><li><a href="Order.html">Order</a></li><li><a href="Ticket.html">Ticket</a></li></ul><h3>Global</h3><ul><li><a href="global.html#channel">channel</a></li><li><a href="global.html#connectRabbit">connectRabbit</a></li><li><a href="global.html#createDatabase">createDatabase</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#getEvent">getEvent</a></li><li><a href="global.html#getEvents">getEvents</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#publishEvent">publishEvent</a></li><li><a href="global.html#restoreEvent">restoreEvent</a></li><li><a href="global.html#updateEvent">updateEvent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue May 13 2025 12:22:37 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
