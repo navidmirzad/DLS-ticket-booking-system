@@ -80,11 +80,6 @@ const TicketSchema = new Schema({
     required: true,
     min: 0,
   },
-  ticket_type: {
-    type: String,
-    required: true,
-    enum: ["STANDARD", "VIP", "EARLY_BIRD", "GROUP"],
-  },
 });
 
 // ORDERS model

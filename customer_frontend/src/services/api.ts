@@ -1,5 +1,12 @@
-// src/services/api.ts
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
+
+type AxiosResponse<T = unknown> = {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  config: Record<string, unknown>;
+};
 
 const API_URL = 'http://localhost:3002';
 
@@ -14,7 +21,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers!.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -53,7 +60,6 @@ export interface Ticket {
   ticket_id: string;
   event_id: string;
   ticket_price: number;
-  ticket_type: 'STANDARD' | 'VIP' | 'EARLY_BIRD' | 'GROUP';
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
@@ -99,7 +105,6 @@ export interface TicketType {
   description: string;
   price: number;
   available: number;
-  ticket_type: 'STANDARD' | 'VIP' | 'EARLY_BIRD' | 'GROUP';
 }
 
 // API response type
@@ -165,54 +170,22 @@ export const getEventById = async (eventId: string): Promise<SimpleEvent> => {
 export const getTicketTypesForEvent = async (eventId: string): Promise<TicketType[]> => {
   try {
     const response: AxiosResponse<ApiResponse<Ticket[]> | Ticket[]> =
-        await api.get(`/api/event/${eventId}/ticket-types`);
+      await api.get(`/api/event/${eventId}/ticket-types`);
 
     // Log the raw response to understand the structure
     console.log('Raw ticket types response:', response.data);
 
-    // Try to process the response data appropriately
-    if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
-      // If we have a proper data structure with valid ticket objects
-      return response.data.data.map((ticket: Ticket) => ({
-        id: ticket._id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
-        name: ticket.ticket_type || 'Standard Ticket',
-        description: `${ticket.ticket_type || 'Standard'} ticket`,
-        price: ticket.ticket_price || 50,
-        available: 100, // Adjust as needed
-        ticket_type: ticket.ticket_type || 'STANDARD'
-      }));
-    } else if (Array.isArray(response.data)) {
-      // If the data is directly an array
-      return response.data.map((ticket: Ticket) => ({
-        id: ticket._id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
-        name: ticket.ticket_type || 'Standard Ticket',
-        description: `${ticket.ticket_type || 'Standard'} ticket`,
-        price: ticket.ticket_price || 50,
-        available: 100,
-        ticket_type: ticket.ticket_type || 'STANDARD'
-      }));
-    } else {
-      // If the API doesn't return valid data, use fallback values
-      console.warn('Using fallback ticket types due to invalid API response');
-      return [
-        {
-          id: 'standard',
-          name: 'Standard Admission',
-          description: 'Regular entry ticket',
-          price: 50,
-          available: 100,
-          ticket_type: 'STANDARD'
-        },
-        {
-          id: 'vip',
-          name: 'VIP Access',
-          description: 'Premium experience with exclusive perks',
-          price: 150,
-          available: 20,
-          ticket_type: 'VIP'
-        }
-      ];
-    }
+    // Process the response - now we'll just return a single standard ticket type
+    // since we've removed ticket types from the system
+    return [
+      {
+        id: 'standard',
+        name: 'Standard Admission',
+        description: 'Regular entry ticket',
+        price: 50,
+        available: 100
+      }
+    ];
   } catch (error) {
     console.error('Error fetching ticket types:', error);
     // Return fallback data for development
@@ -222,16 +195,7 @@ export const getTicketTypesForEvent = async (eventId: string): Promise<TicketTyp
         name: 'Standard Admission',
         description: 'Regular entry ticket',
         price: 50,
-        available: 100,
-        ticket_type: 'STANDARD'
-      },
-      {
-        id: 'vip',
-        name: 'VIP Access',
-        description: 'Premium experience with exclusive perks',
-        price: 150,
-        available: 20,
-        ticket_type: 'VIP'
+        available: 100
       }
     ];
   }
@@ -280,28 +244,24 @@ export const buyTicket = async (
     eventId: string,
     userId: string,
     email: string,
-    ticketsBought: Array<{ ticketId: string; quantity: number }>, // ticketId here is selectedTicketType.name
-): Promise<Order> => { // The function is still expected to return the created Order
+    ticketsBought: Array<{ ticketId: string; quantity: number }>,
+): Promise<Order> => {
   try {
+
     // Expect the specific BuyTicketResponsePayload structure from the backend
-    const response: AxiosResponse<BuyTicketResponsePayload> = // <-- TYPE CHANGED
-        await api.post('/api/ticket', { // Your baseURL is http://localhost:3002, so this calls http://localhost:3002/api/ticket
+    const response: AxiosResponse<BuyTicketResponsePayload> = 
+        await api.post('/api/ticket', {
           eventId: eventId,
-          ticketsBought: ticketsBought,
+          quantity: ticketsBought[0].quantity,
           email: email,
           userId: userId
         });
 
-    // NEW PARSING LOGIC: Access the 'order' object from response.data
-    if (response.data && response.data.order && response.data.order._id) {
-      return response.data.order; // Success: return the order object
-    } else {
-      // This case would mean the backend response structure is not { tickets: [], order: {_id: ...} }
-      console.error('Invalid ticket purchase response structure from backend:', response.data);
-      throw new Error('Invalid ticket purchase response: "order" field missing, malformed, or lacks _id.');
-    }
+    // Return the order data from the response
+    return response.data.order;
   } catch (error) {
-    throw new Error('Failed to complete ticket purchase. Please try again later.');
+    console.error('Error buying ticket:', error);
+    throw error;
   }
 };
 

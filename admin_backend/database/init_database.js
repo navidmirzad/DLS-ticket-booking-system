@@ -43,7 +43,7 @@ async function createDatabase() {
       CREATE TABLE IF NOT EXISTS EVENT (
         id INT AUTO_INCREMENT PRIMARY KEY,
         description_id INT,
-        tickets_available BOOLEAN DEFAULT true,
+        tickets_available INT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_at DATETIME DEFAULT NULL,

@@ -12,7 +12,7 @@ class Event {
    * @param {Object} data - Event data from database
    * @param {number} data.id - Event ID
    * @param {number} data.description_id - ID of associated event description
-   * @param {boolean} data.tickets_available - Whether tickets are available for this event
+   * @param {number} data.tickets_available - Number of tickets available for this event
    * @param {Date} data.created_at - Creation timestamp
    * @param {Date} data.updated_at - Last update timestamp
    * @param {Date|null} data.deleted_at - Deletion timestamp or null if not deleted
