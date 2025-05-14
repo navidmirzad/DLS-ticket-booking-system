@@ -79,8 +79,9 @@ export const createTicket = async (eventId, userId, email, quantity) => {
       },
     };
     await sendToQueue(ticketData);
-    await sendTicketToQueue(ticketData);
   }
+
+  await sendTicketToQueue(order);
 
   return {
     tickets: createdIndividualTickets,

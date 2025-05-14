@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { connectRabbit } from "./rabbitmq.js";
+import { connectRabbit, consumeQueue } from "./rabbitmq.js";
 import { connectMySQL } from "./mysql.js";
 
 dotenv.config();
