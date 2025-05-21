@@ -162,7 +162,7 @@ const updateEvent = async (eventId, eventData) => {
       }
     }
 
-    const updatedEvent = await getEvent(eventId);
+    const updatedEvent = await getEvent(connection, eventId);
 
     await enqueueOutboxEvent(connection, "EventUpdated", updatedEvent);
 

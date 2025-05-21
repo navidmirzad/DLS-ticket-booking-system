@@ -1,6 +1,13 @@
 import express from "express";
-import {getEvents, getEvent, createEvent, updateEvent, deleteEvent} from '../services/eventService.js';
-import {isAuthenticated} from '../middleware/auth.js';
+import {
+  getEvents,
+  getEvent,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from "../services/eventService.js";
+import { isAuthenticated } from "../middleware/auth.js";
+import { getConnection } from "../database/connection.js";
 
 /**
  * Express router for event API endpoints
@@ -75,14 +82,14 @@ const router = express.Router();
  * @returns {Object} JSON response with array of events
  */
 router.get("/api/admin/events", isAuthenticated, async (req, res) => {
-    try {
-      const events = await getEvents();
-      res.send({ data: events });
-    } catch (error) {
-      res.status(500).send({ error: "Failed to fetch events" });
-    }
-  });
-  
+  try {
+    const events = await getEvents();
+    res.send({ data: events });
+  } catch (error) {
+    res.status(500).send({ error: "Failed to fetch events" });
+  }
+});
+
 /**
  * @swagger
  * /api/admin/events/{id}:
@@ -125,19 +132,20 @@ router.get("/api/admin/events", isAuthenticated, async (req, res) => {
  * @returns {Object} JSON response with event details or error
  */
 router.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      const event = await getEvent(eventId);
+  try {
+    const eventId = req.params.id;
+    const connection = await getConnection();
+    const event = await getEvent(connection, eventId);
 
-      if (!event) {
-        return res.status(404).send({ error: "Event not found" });
-      }
-      res.send({ data: event });
-    } catch (error) {
-      res.status(500).send({ error: "Failed to fetch event" });
+    if (!event) {
+      return res.status(404).send({ error: "Event not found" });
     }
-  });
-  
+    res.send({ data: event });
+  } catch (error) {
+    res.status(500).send({ error: "Failed to fetch event" });
+  }
+});
+
 /**
  * @swagger
  * /api/admin/events:
@@ -197,15 +205,15 @@ router.get("/api/admin/events/:id", isAuthenticated, async (req, res) => {
  * @returns {Object} JSON response with created event or error
  */
 router.post("/api/admin/events", isAuthenticated, async (req, res) => {
-    try {
-      const event = req.body;
-      const newEvent = await createEvent(event);
-      res.send({ data: newEvent });
-    } catch (error) {
-      res.status(500).send({ error: "Failed to create event" });
-    }
-  });
-  
+  try {
+    const event = req.body;
+    const newEvent = await createEvent(event);
+    res.send({ data: newEvent });
+  } catch (error) {
+    res.status(500).send({ error: "Failed to create event" });
+  }
+});
+
 /**
  * @swagger
  * /api/admin/events/{id}:
@@ -273,20 +281,20 @@ router.post("/api/admin/events", isAuthenticated, async (req, res) => {
  * @returns {Object} JSON response with updated event or error
  */
 router.patch("/api/admin/events/:id", isAuthenticated, async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      const event = req.body;
-      const updatedEvent = await updateEvent(eventId, event);
-      
-      if (!updatedEvent) {
-        return res.status(404).send({ error: "Event not found" });
-      }
-      res.send({ data: updatedEvent });
-    } catch (error) {
-      res.status(500).send({ error: "Failed to update event" });
+  try {
+    const eventId = req.params.id;
+    const eventData = req.body;
+    const updatedEvent = await updateEvent(eventId, eventData);
+
+    if (!updatedEvent) {
+      return res.status(404).send({ error: "Event not found" });
     }
-  });
-  
+    res.send({ data: updatedEvent });
+  } catch (error) {
+    res.status(500).send({ error: "Failed to update event" });
+  }
+});
+
 /**
  * @swagger
  * /api/admin/events/{id}:
@@ -322,16 +330,16 @@ router.patch("/api/admin/events/:id", isAuthenticated, async (req, res) => {
  * @returns {Object} JSON response with success message or error
  */
 router.delete("/api/admin/events/:id", isAuthenticated, async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      await deleteEvent(eventId);
-      res.send({ message: "Event deleted successfully" });
-    } catch (error) {
-      if (error.message === 'Event not found') {
-        return res.status(404).send({ error: "Event not found" });
-      }
-      res.status(500).send({ error: "Failed to delete event" });
+  try {
+    const eventId = req.params.id;
+    await deleteEvent(eventId);
+    res.send({ message: "Event deleted successfully" });
+  } catch (error) {
+    if (error.message === "Event not found") {
+      return res.status(404).send({ error: "Event not found" });
     }
-  });
+    res.status(500).send({ error: "Failed to delete event" });
+  }
+});
 
 export default router;
