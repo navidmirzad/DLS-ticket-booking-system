@@ -53,7 +53,7 @@ async function createDatabase() {
 
     await connection.query(`
       CREATE TABLE IF NOT EXISTS TICKETS (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id VARCHAR(50) PRIMARY KEY,
         event_id INT,
         price DECIMAL(10, 2),
         type VARCHAR(50),
@@ -65,7 +65,7 @@ async function createDatabase() {
 
     await connection.query(`
       CREATE TABLE IF NOT EXISTS ORDERS (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id VARCHAR(50) PRIMARY KEY,
         email VARCHAR(255),
         tickets_bought INT,
         total_price DECIMAL(10, 2),

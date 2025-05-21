@@ -51,11 +51,11 @@ export async function seedMySQL() {
     // Insert tickets
     await connection.query(
       `
-      INSERT INTO TICKETS (event_id, price, type)
+      INSERT INTO TICKETS (id, event_id, price, type)
       VALUES 
-        (?, 99.99, 'STANDARD'), 
-        (?, 149.99, 'VIP'),
-        (?, 49.99, 'EARLY_BIRD')
+        ('1', ?, 99.99, 'STANDARD'), 
+        ('2', ?, 149.99, 'VIP'),
+        ('3', ?, 49.99, 'EARLY_BIRD')
     `,
       eventIds
     );

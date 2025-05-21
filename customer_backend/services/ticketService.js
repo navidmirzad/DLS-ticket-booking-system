@@ -81,7 +81,13 @@ export const createTicket = async (eventId, userId, email, quantity) => {
     await sendToQueue(ticketData);
   }
 
-  await sendTicketToQueue(order);
+
+  await sendTicketToQueue({
+    eventId: event.id,
+    ticketsAvailable: event.tickets_available - createdIndividualTickets.length,
+    tickets: createdIndividualTickets,
+    order,
+  });
 
   return {
     tickets: createdIndividualTickets,

@@ -3,22 +3,12 @@ import { syncToMySQL } from "./sync.js";
 
 let channel;
 
-export const connectRabbit = async (retries = 5, delay = 5000) => {
-  while (retries > 0) {
-    try {
-      const connection = await amqp.connect(process.env.RABBITMQ_URL);
-      channel = await connection.createChannel();
-      await channel.assertQueue("ticketQueue"); // Ensure the queue exists
-      console.log("RabbitMQ connected ✅");
-      return;
-    } catch (error) {
-      console.error("RabbitMQ connection failed. Retrying...", error);
-      retries -= 1;
-      if (retries === 0)
-        throw new Error("RabbitMQ connection failed after retries");
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
+export const connectRabbit = async () => {
+  console.log("Connecting to RabbitMQ:", process.env.RABBITMQ_URL);
+  const conn = await amqp.connect(process.env.RABBITMQ_URL);
+  channel = await conn.createChannel();
+  await channel.assertQueue("ticketQueue"); // Ensure the ticketQueue exists
+  console.log("RabbitMQ connected and queues asserted.");
 };
 
 export const consumeQueue = async () => {
