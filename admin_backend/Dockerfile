@@ -16,5 +16,5 @@ RUN chmod +x /usr/local/bin/wait-for-it.sh
 
 EXPOSE 3001
 
-# Wait for MySQL and then start app
-CMD ["sh", "-c", "wait-for-it.sh mysql 3306 node app.js"]
+# Default: run app.js after MySQL is ready
+CMD ["sh", "-c", "wait-for-it.sh mysql:3306 -- node app.js"]
