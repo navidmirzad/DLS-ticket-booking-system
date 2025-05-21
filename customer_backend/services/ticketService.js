@@ -66,6 +66,7 @@ export const createTicket = async (eventId, userId, email, quantity) => {
       type: "TICKET_BOUGHT",
       to: email,
       id: ticket._id,
+      event_id: eventId,
       ticket: {
         id: ticket.ticket_id,
         price: ticket.ticket_price,

@@ -20,6 +20,8 @@ import {
   TicketType
 } from '../services/api';
 import { formatDate, formatShortDate, formatTime } from '../utils/dateUtils';
+import LiveEventUpdates from '../components/LiveEventUpdates';
+import { useEventUpdates } from '../services/sseService';
 
 // Safe formatting functions with fallbacks
 const isValidDate = (dateString: string | Date | undefined | null): boolean => {
@@ -27,7 +29,8 @@ const isValidDate = (dateString: string | Date | undefined | null): boolean => {
   try {
     const date = new Date(dateString);
     return !isNaN(date.getTime());
-  } catch (e) {
+  } catch {
+    // Ignore error - just return false for invalid dates
     return false;
   }
 };
@@ -57,7 +60,10 @@ const EventDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [ticketDataError, setTicketDataError] = useState<string | null>(null);
   const [selectedTickets, setSelectedTickets] = useState(0);
-
+  
+  // Always call hook with empty string if id is undefined to avoid conditional hook call
+  const { eventUpdates } = useEventUpdates(id || '');
+  
   useEffect(() => {
     const fetchEventData = async () => {
       if (!id) return;
@@ -117,6 +123,37 @@ const EventDetailPage: React.FC = () => {
 
     fetchEventData();
   }, [id]);
+
+  // Effect to update ticket availability when SSE updates are received
+  useEffect(() => {
+    if (eventUpdates.length > 0 && event && id) {
+      // Get the most recent update
+      const latestUpdate = eventUpdates[0];
+      
+      if (latestUpdate.type === 'TICKET_PURCHASED' && 
+          typeof latestUpdate.remainingTickets === 'number') {
+        // Update the event with new ticket availability
+        setEvent(prevEvent => {
+          if (!prevEvent) return null;
+          return {
+            ...prevEvent,
+            // Ensure capacity is a number
+            capacity: latestUpdate.remainingTickets || prevEvent.capacity
+          };
+        });
+        
+        // Also update ticket types with new availability
+        setTicketTypes(prevTypes => {
+          if (!prevTypes || prevTypes.length === 0) return prevTypes;
+          return prevTypes.map(type => ({
+            ...type,
+            // Ensure available is a number
+            available: latestUpdate.remainingTickets || type.available
+          }));
+        });
+      }
+    }
+  }, [eventUpdates, event, id]);
 
   const handleTicketTypeChange = (ticketTypeId: string) => {
     setSelectedTicketType(ticketTypeId);
@@ -217,6 +254,9 @@ const EventDetailPage: React.FC = () => {
 
                 <div className="prose max-w-none text-neutral-700 leading-relaxed">
                   <p className="mb-6 text-lg">{event.description || 'No description available'}</p>
+
+                  {/* Only render LiveEventUpdates if we have a valid eventId */}
+                  {id && <LiveEventUpdates eventId={id} />}
 
                   <div className="border-t border-neutral-100 pt-6 mt-6">
                     <h3 className="flex items-center text-lg font-medium text-text mb-4">

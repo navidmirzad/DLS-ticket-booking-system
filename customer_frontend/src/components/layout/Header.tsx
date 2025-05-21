@@ -28,8 +28,8 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <Ticket className="h-8 w-8 text-accent" strokeWidth={1.5} />
-            <span className="ml-2 text-2xl font-bold font-heading text-text">Eventix</span>
+            <Ticket className="h-12 w-12 text-accent" strokeWidth={1.5} />
+            <span className="ml-3 text-3xl font-bold font-heading text-text">Eventix</span>
           </Link>
 
           {/* Desktop Navigation */}
