@@ -10,9 +10,14 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(
-    cors({
-      origin: [process.env.ADMIN_BACKEND, process.env.ADMIN_FRONTEND, process.env.CUSTOMER_BACKEND, process.env.CUSTOMER_FRONTEND],
-    })
+  cors({
+    origin: [
+      process.env.ADMIN_BACKEND,
+      process.env.ADMIN_FRONTEND,
+      process.env.CUSTOMER_BACKEND,
+      process.env.CUSTOMER_FRONTEND,
+    ],
+  })
 );
 
 const connectToDatabase = async () => {
@@ -41,7 +46,7 @@ const seedAdminUser = async () => {
         email: "admin@test.com",
         phone: "+1234567890",
         password: "password123",
-        role: "admin"
+        role: "admin",
       });
 
       await adminUser.save();

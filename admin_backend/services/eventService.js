@@ -1,15 +1,22 @@
 import Event from "../models/Event.js";
-import { publishEvent } from "../util/rabbitmq.js";
 
 /**
- * Retrieves all non-deleted events from the database
- * @async
- * @returns {Promise<Array>} Array of event objects ordered by date
- * @throws {Error} If there's an error fetching events
+ * Inserts an event message into the outbox table (instead of publishing directly)
+ * @param {Object} connection - MySQL connection
+ * @param {string} type - Event type (e.g. "EventCreated")
+ * @param {Object} payload - Event payload
  */
+const enqueueOutboxEvent = async (connection, type, payload) => {
+  await connection.query(
+    `INSERT INTO EVENT_OUTBOX (event_type, payload) VALUES (?, ?)`,
+    [type, JSON.stringify(payload)]
+  );
+};
+
+// Existing service functions
 const getEvents = async () => {
+  const connection = await Event.getConnection();
   try {
-    const connection = await Event.getConnection();
     const [rows] = await connection.query(`
       SELECT e.*, ed.*
       FROM EVENT e
@@ -17,74 +24,42 @@ const getEvents = async () => {
       WHERE e.deleted_at IS NULL
       ORDER BY ed.date ASC
     `);
-    await connection.end();
     return rows;
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    throw error;
-  }
-};
-
-/**
- * Retrieves a specific event by ID including its tickets
- * @async
- * @param {number} eventId - The ID of the event to retrieve
- * @returns {Promise<Object|null>} Event object with tickets property or null if not found
- * @throws {Error} If there's an error fetching the event
- */
-const getEvent = async (eventId) => {
-  try {
-    const connection = await Event.getConnection();
-
-    const [rows] = await connection.query(
-      `
-      SELECT e.*, ed.*, t.id as ticket_id, t.price, t.type
-      FROM EVENT e
-      JOIN EVENT_DESCRIPTION ed ON e.description_id = ed.id
-      LEFT JOIN TICKETS t ON e.id = t.event_id
-      WHERE e.id = ? AND e.deleted_at IS NULL
-    `,
-      [eventId]
-    );
-
+  } finally {
     await connection.end();
-
-    if (rows.length === 0) {
-      return null;
-    }
-
-    const event = rows[0];
-    event.tickets = rows
-      .map((row) => ({
-        id: row.ticket_id,
-        price: row.price,
-        type: row.type,
-      }))
-      .filter((ticket) => ticket.id != null);
-
-    return event;
-  } catch (error) {
-    console.error("Error fetching event:", error);
-    throw error;
   }
 };
 
-/**
- * Creates a new event with its description and tickets
- * @async
- * @param {Object} eventData - Data for the new event
- * @param {string} eventData.title - Event title
- * @param {string} eventData.image - URL or path to the event image
- * @param {number} eventData.capacity - Maximum capacity for the event
- * @param {string} eventData.date - Date of the event
- * @param {string} eventData.description - Description of the event
- * @param {string} eventData.location - Location of the event
- * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
- * @param {number} [eventData.tickets[].price] - Price of the ticket
- * @param {string} [eventData.tickets[].type] - Type of the ticket
- * @returns {Promise<Object>} The newly created event
- * @throws {Error} If there's an error creating the event
- */
+// getEvent.js
+const getEvent = async (connection, eventId) => {
+  const [rows] = await connection.query(
+    `SELECT 
+        E.id,
+        ED.title,
+        ED.image, ED.capacity, ED.date,
+        ED.description, ED.location
+      FROM EVENT E
+      JOIN EVENT_DESCRIPTION ED ON E.description_id = ED.id
+      WHERE E.id = ?`,
+    [eventId]
+  );
+
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    title: row.title,
+    image: row.image,
+    capacity: row.capacity,
+    date: row.date,
+    description: row.description,
+    location: row.location,
+    tickets: [],
+    tickets_available: row.capacity,
+  };
+};
+
 const createEvent = async (eventData) => {
   const connection = await Event.getConnection();
   try {
@@ -107,31 +82,24 @@ const createEvent = async (eventData) => {
       [descResult.insertId, eventData.capacity]
     );
 
-    if (eventData.tickets && eventData.tickets.length > 0) {
+    if (eventData.tickets?.length) {
       const ticketValues = eventData.tickets.map((ticket) => [
         eventResult.insertId,
         ticket.price,
         ticket.type,
       ]);
-
       await connection.query(
         "INSERT INTO TICKETS (event_id, price, type) VALUES ?",
         [ticketValues]
       );
     }
 
+    const newEvent = await getEvent(connection, eventResult.insertId);
+    console.log("New event before enqueueing:", newEvent);
+
+    await enqueueOutboxEvent(connection, "EventCreated", newEvent);
+
     await connection.commit();
-
-    // Get the event and publish after committing the transaction
-    const newEvent = await getEvent(eventResult.insertId);
-
-    if (newEvent) {
-      await publishEvent({
-        type: "EventCreated",
-        payload: newEvent,
-      });
-    }
-
     return newEvent;
   } catch (error) {
     await connection.rollback();
@@ -142,21 +110,6 @@ const createEvent = async (eventData) => {
   }
 };
 
-/**
- * Updates an existing event and its associated data
- * @async
- * @param {number} eventId - The ID of the event to update
- * @param {Object} eventData - Updated event data
- * @param {string} [eventData.title] - Event title
- * @param {string} [eventData.image] - URL or path to the event image
- * @param {string} [eventData.date] - Date of the event
- * @param {string} [eventData.description] - Description of the event
- * @param {string} [eventData.location] - Location of the event
- * @param {boolean} [eventData.tickets_available] - Whether tickets are available for this event
- * @param {Array<Object>} [eventData.tickets] - Array of ticket objects
- * @returns {Promise<Object>} The updated event
- * @throws {Error} If event not found or there's an error updating the event
- */
 const updateEvent = async (eventId, eventData) => {
   const connection = await Event.getConnection();
   try {
@@ -166,17 +119,13 @@ const updateEvent = async (eventId, eventData) => {
       "SELECT description_id FROM EVENT WHERE id = ? AND deleted_at IS NULL",
       [eventId]
     );
-
-    if (eventRows.length === 0) {
-      throw new Error("Event not found");
-    }
+    if (eventRows.length === 0) throw new Error("Event not found");
 
     const descriptionId = eventRows[0].description_id;
 
     await connection.query(
       `UPDATE EVENT_DESCRIPTION 
-       SET title = ?, image = ?, date = ?, 
-           description = ?, location = ?
+       SET title = ?, image = ?, date = ?, description = ?, location = ?
        WHERE id = ?`,
       [
         eventData.title,
@@ -190,7 +139,7 @@ const updateEvent = async (eventId, eventData) => {
 
     if (eventData.tickets_available !== undefined) {
       await connection.query(
-        "UPDATE EVENT SET tickets_available = ? WHERE id = ? AND deleted_at IS NULL",
+        "UPDATE EVENT SET tickets_available = ? WHERE id = ?",
         [eventData.tickets_available, eventId]
       );
     }
@@ -206,7 +155,6 @@ const updateEvent = async (eventId, eventData) => {
           ticket.price,
           ticket.type,
         ]);
-
         await connection.query(
           "INSERT INTO TICKETS (event_id, price, type) VALUES ?",
           [ticketValues]
@@ -214,16 +162,11 @@ const updateEvent = async (eventId, eventData) => {
       }
     }
 
+    const updatedEvent = await getEvent(connection, eventId);
+
+    await enqueueOutboxEvent(connection, "EventUpdated", updatedEvent);
+
     await connection.commit();
-
-    const updatedEvent = await getEvent(eventId);
-
-    // Publish the event to RabbitMQ
-    await publishEvent({
-      type: "EventUpdated",
-      payload: updatedEvent,
-    });
-
     return updatedEvent;
   } catch (error) {
     await connection.rollback();
@@ -234,39 +177,22 @@ const updateEvent = async (eventId, eventData) => {
   }
 };
 
-/**
- * Soft deletes an event by setting its deleted_at timestamp
- * @async
- * @param {number} eventId - The ID of the event to delete
- * @returns {Promise<Object>} The deleted event object
- * @throws {Error} If event not found or there's an error during deletion
- */
 const deleteEvent = async (eventId) => {
   const connection = await Event.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Get the event before deletion for publishing
-    const eventToDelete = await getEvent(eventId);
+    const eventToDelete = await getEvent(connection, eventId);
+    if (!eventToDelete) throw new Error("Event not found");
 
-    if (!eventToDelete) {
-      throw new Error("Event not found");
-    }
-
-    // Soft delete the event
     await connection.query(
       "UPDATE EVENT SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
       [eventId]
     );
 
+    await enqueueOutboxEvent(connection, "EventDeleted", eventToDelete);
+
     await connection.commit();
-
-    // Publish the event deletion
-    await publishEvent({
-      type: "EventDeleted",
-      payload: eventToDelete,
-    });
-
     return eventToDelete;
   } catch (error) {
     await connection.rollback();
@@ -277,13 +203,6 @@ const deleteEvent = async (eventId) => {
   }
 };
 
-/**
- * Restores a previously deleted event by clearing its deleted_at field
- * @async
- * @param {number} eventId - The ID of the event to restore
- * @returns {Promise<Object>} The restored event object
- * @throws {Error} If there's an error restoring the event
- */
 const restoreEvent = async (eventId) => {
   const connection = await Event.getConnection();
   try {

@@ -51,7 +51,10 @@ class Event {
   static async findById(id) {
     const connection = await this.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM EVENT WHERE id = ? AND deleted_at IS NULL', [id]);
+      const [rows] = await connection.query(
+        "SELECT * FROM EVENT WHERE id = ? AND deleted_at IS NULL",
+        [id]
+      );
       return rows.length ? new Event(rows[0]) : null;
     } finally {
       await connection.end();
@@ -71,7 +74,7 @@ class Event {
     const connection = await this.getConnection();
     try {
       const [result] = await connection.query(
-        'INSERT INTO EVENT (description_id, tickets_available) VALUES (?, ?)',
+        "INSERT INTO EVENT (description_id, tickets_available) VALUES (?, ?)",
         [eventData.description_id, eventData.tickets_available]
       );
       return result.insertId;
@@ -92,7 +95,7 @@ class Event {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE EVENT SET tickets_available = ? WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE EVENT SET tickets_available = ? WHERE id = ? AND deleted_at IS NULL",
         [isAvailable, eventId]
       );
     } finally {
@@ -111,7 +114,7 @@ class Event {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE EVENT SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE EVENT SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
         [eventId]
       );
     } finally {
@@ -130,7 +133,7 @@ class Event {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE EVENT SET deleted_at = NULL WHERE id = ?',
+        "UPDATE EVENT SET deleted_at = NULL WHERE id = ?",
         [eventId]
       );
     } finally {
@@ -139,4 +142,4 @@ class Event {
   }
 }
 
-export default Event; 
+export default Event;

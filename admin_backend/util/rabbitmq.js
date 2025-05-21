@@ -46,13 +46,13 @@ export const connectRabbit = async (retries = 5, delay = 5000) => {
 export const publishEvent = async (event) => {
   console.log(event);
   if (!channel) throw new Error("RabbitMQ channel not initialized");
-  if(event.type === "EventCreated") {
+  if (event.type === "EventCreated") {
     channel.sendToQueue("eventCreated", Buffer.from(JSON.stringify(event)));
   }
-  if(event.type === "EventUpdated") {
+  if (event.type === "EventUpdated") {
     channel.sendToQueue("eventUpdated", Buffer.from(JSON.stringify(event)));
   }
-  if(event.type === "EventDeleted") {
+  if (event.type === "EventDeleted") {
     channel.sendToQueue("eventDeleted", Buffer.from(JSON.stringify(event)));
   }
 };

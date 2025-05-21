@@ -21,6 +21,7 @@ export async function seedMySQL() {
     await connection.query(`DELETE FROM EVENT_DESCRIPTION`);
 
     // Insert event descriptions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [descResults] = await connection.query(`
       INSERT INTO EVENT_DESCRIPTION (title, image, capacity, date, description, location)
       VALUES 
@@ -35,6 +36,7 @@ export async function seedMySQL() {
     const descIds = [firstDescId, firstDescId + 1, firstDescId + 2];
 
     // Insert events
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [eventResults] = await connection.query(
       `
       INSERT INTO EVENT (description_id, tickets_available)

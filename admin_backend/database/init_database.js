@@ -4,13 +4,13 @@ dotenv.config();
 
 /**
  * Initializes the database by creating necessary tables if they don't exist
- * 
+ *
  * Creates the following tables:
  * - EVENT_DESCRIPTION: Stores event details such as title, image, capacity, etc.
  * - EVENT: Stores event records with references to descriptions
  * - TICKETS: Stores ticket information for events
  * - ORDERS: Stores customer orders
- * 
+ *
  * @async
  * @returns {Promise<void>}
  * @throws {Error} If there's an error creating the database or tables
@@ -74,6 +74,17 @@ async function createDatabase() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_at DATETIME DEFAULT NULL
       )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS EVENT_OUTBOX (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        event_type VARCHAR(255) NOT NULL,
+        payload JSON NOT NULL,
+        published BOOLEAN DEFAULT FALSE,
+        published_at TIMESTAMP NULL DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `);
 
     console.log("Database and tables created successfully");

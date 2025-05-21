@@ -62,6 +62,23 @@ services:
     networks:
       - rabbitmq_network
 
+  admin_outbox_publisher:
+    build: ./admin_backend
+    command: sh -c "wait-for-it.sh mysql:3306 -- node jobs/EventOutboxPublisher.js"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - rabbitmq_network
+
   customer_backend:
     build: ./customer_backend
     ports:
