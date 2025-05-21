@@ -66,18 +66,23 @@ export interface Ticket {
   __type?: string;
 }
 
+export interface OrderTicket {
+  ticket_id: string;
+  quantity: number;
+  _id?: string;
+}
+
 // Order interface from MongoDB model
 export interface Order {
   _id: string;
-  order_id: string; // This is the UUID for the order
+  order_id: string;
   email: string;
-  tickets_bought: string[]; // <-- CORRECTED: Now an array of ticket_id strings (UUIDs of created Ticket documents)
+  tickets_bought: OrderTicket[];
   total_price: number;
-  order_status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  order_status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
-  __type?: string;
 }
 
 interface BuyTicketResponsePayload {
@@ -109,9 +114,8 @@ export interface TicketType {
 
 // API response type
 interface ApiResponse<T> {
-  success?: boolean;
-  message?: string;
-  data?: T;
+  data: T;
+  error?: string;
 }
 
 // Helper function to map the complex Event object to a simpler structure
@@ -271,6 +275,34 @@ export const refundTicket = async (ticketId: string): Promise<void> => {
     await api.delete(`/api/ticket/${ticketId}`);
   } catch (error) {
     console.error('Error refunding ticket:', error);
+    throw error;
+  }
+};
+
+// Get user's orders
+export const getMyOrders = async (): Promise<Order[]> => {
+  try {
+    console.log('Calling /api/orders/my-orders endpoint');
+    const response: AxiosResponse<ApiResponse<Order[]>> = await api.get('/api/orders/my-orders');
+    console.log('Raw response:', response);
+    
+    if (!response.data) {
+      console.error('No data in response:', response);
+      throw new Error('No data received from server');
+    }
+
+    if ('data' in response.data) {
+      console.log('Orders from response:', response.data.data);
+      return response.data.data;
+    } else if (Array.isArray(response.data)) {
+      console.log('Orders from direct response:', response.data);
+      return response.data;
+    } else {
+      console.error('Invalid response format:', response.data);
+      throw new Error('Invalid response format');
+    }
+  } catch (error) {
+    console.error('Error fetching orders:', error);
     throw error;
   }
 };

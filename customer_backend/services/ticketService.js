@@ -12,7 +12,7 @@ export const getTicketsByUserID = async (userId) => {
 };
 
 export const getTicketByID = async (ticketId) => {
-  return await Ticket.findById(ticketId);
+  return await Ticket.findOne({ ticket_id: ticketId });
 };
 
 export const createTicket = async (eventId, userId, email, quantity) => {
@@ -95,8 +95,8 @@ export const deleteTicket = async (ticketId) => {
   }
 
   await increaseCapacity(ticket.event_id);
-  return await Ticket.findByIdAndUpdate(
-    ticketId,
+  return await Ticket.findOneAndUpdate(
+    { ticket_id: ticketId },
     { deleted_at: new Date() },
     { new: true }
   );

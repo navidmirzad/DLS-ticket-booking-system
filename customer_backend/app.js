@@ -22,6 +22,9 @@ app.use(ticketRouter);
 import eventRouter from "./routes/eventRouter.js";
 app.use(eventRouter);
 
+import orderRouter from "./routes/orderRouter.js";
+app.use('/api/orders', orderRouter);
+
 import { connectRabbit, consumeQueue } from "./util/rabbitmq.js";
 await connectRabbit();
 await consumeQueue();
