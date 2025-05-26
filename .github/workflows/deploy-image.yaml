@@ -1,4 +1,4 @@
-name: Build, Push and Deploy a Docker Image to DigitalOcean
+name: Build and Deploy Services to DigitalOcean
 
 on:
   push:
@@ -9,14 +9,11 @@ permissions:
   packages: write
 
 jobs:
-  build-push-deploy-image:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Log in to DigitalOcean container registry
         uses: docker/login-action@v3
@@ -25,11 +22,24 @@ jobs:
           username: samimsaidi
           password: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: registry.digitalocean.com/dls/myapp:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build and push services
+        run: |
+          docker-compose build
+
+          docker tag dls-ticket-booking-system-auth_service:latest registry.digitalocean.com/dls/auth_service:latest
+          docker tag dls-ticket-booking-system-admin_backend:latest registry.digitalocean.com/dls/admin_backend:latest
+          docker tag dls-ticket-booking-system-customer_backend:latest registry.digitalocean.com/dls/customer_backend:latest
+          docker tag dls-ticket-booking-system-customer_frontend:latest registry.digitalocean.com/dls/customer_frontend:latest
+          docker tag dls-ticket-booking-system-admin_frontend:latest registry.digitalocean.com/dls/admin_frontend:latest
+          docker tag dls-ticket-booking-system-mail_service:latest registry.digitalocean.com/dls/mail_service:latest
+          docker tag dls-ticket-booking-system-admin_sync_service:latest registry.digitalocean.com/dls/admin_sync_service:latest
+          docker tag dls-ticket-booking-system-customer_sync_service:latest registry.digitalocean.com/dls/customer_sync_service:latest
+
+          docker push registry.digitalocean.com/dls/auth_service:latest
+          docker push registry.digitalocean.com/dls/admin_backend:latest
+          docker push registry.digitalocean.com/dls/customer_backend:latest
+          docker push registry.digitalocean.com/dls/customer_frontend:latest
+          docker push registry.digitalocean.com/dls/admin_frontend:latest
+          docker push registry.digitalocean.com/dls/mail_service:latest
+          docker push registry.digitalocean.com/dls/admin_sync_service:latest
+          docker push registry.digitalocean.com/dls/customer_sync_service:latest
