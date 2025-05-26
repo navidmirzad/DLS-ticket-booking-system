@@ -24,4 +24,5 @@ RUN chmod +x /usr/local/bin/wait-for-it.sh
 EXPOSE 3004
 
 # Start the service
-CMD ["sh", "-c", "wait-for-it.sh rabbitmq 5672 node index.js"]
+CMD ["sh", "-c", "wait-for-it.sh rabbitmq:5672 -- wait-for-it.sh mysql:3306 -- node index.js"]
+

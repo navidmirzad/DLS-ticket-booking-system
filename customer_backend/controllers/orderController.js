@@ -39,20 +39,39 @@ export const createOrder = async (req, res) => {
 
 export const getOrdersByUser = async (req, res) => {
   try {
-    console.log('Getting orders for user:', req.user);
     const { email } = req.user;
-    
+
     if (!email) {
       return res.status(400).json({ error: "User email is required" });
     }
 
-    const orders = await Order.find({ 
-      email,
-      deleted_at: null 
-    }).sort({ created_at: -1 });
-    
-    console.log('Found orders:', orders);
-    res.json({ data: orders });
+    const orders = await Order.find({ email }).sort({ created_at: -1 });
+
+    // Fetch all tickets referenced in all orders
+    const allTicketIds = orders.flatMap(order =>
+      order.tickets_bought.map(tb => tb.ticket_id)
+    );
+
+    const tickets = await Ticket.find({
+      ticket_id: { $in: allTicketIds },
+      deleted_at: null
+    });
+
+    const validTicketIds = new Set(tickets.map(t => t.ticket_id));
+
+    // Filter out tickets not in the valid list
+    const filteredOrders = orders.map(order => {
+      const filteredTickets = order.tickets_bought.filter(tb =>
+        validTicketIds.has(tb.ticket_id)
+      );
+
+      return {
+        ...order.toObject(),
+        tickets_bought: filteredTickets
+      };
+    });
+
+    res.json({ data: filteredOrders });
   } catch (error) {
     console.error("Error getting orders:", error);
     res.status(500).json({ error: error.message });

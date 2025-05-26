@@ -52,18 +52,6 @@ async function createDatabase() {
     `);
 
     await connection.query(`
-      CREATE TABLE IF NOT EXISTS TICKETS (
-        id VARCHAR(50) PRIMARY KEY,
-        event_id INT,
-        price DECIMAL(10, 2),
-        type VARCHAR(50),
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (event_id) REFERENCES EVENT(id)
-      )
-    `);
-
-    await connection.query(`
       CREATE TABLE IF NOT EXISTS ORDERS (
         id VARCHAR(50) PRIMARY KEY,
         email VARCHAR(255),
@@ -71,8 +59,23 @@ async function createDatabase() {
         total_price DECIMAL(10, 2),
         status VARCHAR(50),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         deleted_at DATETIME DEFAULT NULL
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS TICKETS (
+        id VARCHAR(50) PRIMARY KEY,
+        event_id INT,
+        price DECIMAL(10, 2),
+        type VARCHAR(50),
+        order_id VARCHAR(50),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        deleted_at DATETIME DEFAULT NULL,
+        FOREIGN KEY (event_id) REFERENCES EVENT(id),
+        FOREIGN KEY (order_id) REFERENCES ORDERS(id)
       )
     `);
 
