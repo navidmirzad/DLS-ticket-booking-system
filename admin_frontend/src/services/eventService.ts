@@ -1,6 +1,6 @@
 import { Event } from "../types/Event";
 
-const ADMIN_BACKEND_URL = "http://localhost:3001/api/admin";
+const ADMIN_BACKEND_URL = "http://localhost:30001/api/admin";
 
 export const fetchEvents = async (): Promise<Event[]> => {
   const response = await fetch(`${ADMIN_BACKEND_URL}/events`, {

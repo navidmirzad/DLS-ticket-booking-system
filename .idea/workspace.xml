@@ -4,21 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="update wait-for-it.sh to use LF instead of CRLF">
+    <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="frontend WIP">
+      <change afterPath="$PROJECT_DIR$/k8-setup/deploy.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/k8-setup/docker-desktop-k8s.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth_service/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth_service/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth_service/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/auth/AuthModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/components/events/EventCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_frontend/src/services/eventService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/admin_frontend/src/services/eventService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_sync_service/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/admin_sync_service/wait-for-it.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/BookingPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/CheckoutPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/CheckoutPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventDetailPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/EventsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/pages/HomePage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/types/eventTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/customer_sync_service/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/customer_sync_service/wait-for-it.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,10 +48,10 @@
     &quot;accountId&quot;: &quot;41a2738e-6471-45cb-8a6a-10f4e6e0684a&quot;
   }
 }</component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -71,6 +66,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/danie/IdeaProjects/SoftwareUdvikling/DLS/TicketBookingSystem/customer_frontend",
@@ -110,8 +106,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23726.103" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23726.103" />
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.21565.193" />
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-IU-243.21565.193" />
       </set>
     </attachedChunks>
   </component>
@@ -128,6 +124,7 @@
       <workItem from="1745390459815" duration="65000" />
       <workItem from="1745390536813" duration="626000" />
       <workItem from="1745394154320" duration="22581000" />
+      <workItem from="1748246163092" duration="13244000" />
     </task>
     <task id="LOCAL-00001" summary="merge w. main">
       <option name="closed" value="true" />
@@ -145,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745391766693</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="frontend WIP">
+      <option name="closed" value="true" />
+      <created>1745959944062</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1745959944062</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,6 +182,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="merge w. main" />
     <MESSAGE value="update wait-for-it.sh to use LF instead of CRLF" />
-    <option name="LAST_COMMIT_MESSAGE" value="update wait-for-it.sh to use LF instead of CRLF" />
+    <MESSAGE value="frontend WIP" />
+    <option name="LAST_COMMIT_MESSAGE" value="frontend WIP" />
   </component>
 </project>

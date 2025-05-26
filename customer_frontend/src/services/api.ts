@@ -8,7 +8,7 @@ type AxiosResponse<T = unknown> = {
   config: Record<string, unknown>;
 };
 
-const API_URL = 'http://localhost:3002';
+const API_URL = import.meta.env.VITE_CUSTOMER_BACKEND_URL || 'http://localhost:30002';
 
 const api = axios.create({
   baseURL: API_URL,

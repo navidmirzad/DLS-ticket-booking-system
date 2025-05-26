@@ -8,8 +8,7 @@ dotenv.config();
 
 app.use(
   cors({
-    origin: "http://localhost:8080", // Ensure this matches your frontend URL
-  })
+      origin: process.env.CORS_ORIGIN || "http://localhost:30080"  })
 );
 
 await connectMongo();
