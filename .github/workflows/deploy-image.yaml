@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and push services
         run: |
-          docker-compose build
+          docker compose build
 
           docker tag dls-ticket-booking-system-auth_service:latest registry.digitalocean.com/dls/auth_service:latest
           docker tag dls-ticket-booking-system-admin_backend:latest registry.digitalocean.com/dls/admin_backend:latest
