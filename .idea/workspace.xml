@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="16248444-0234-4f72-92d0-52d050be74f9" name="Changes" comment="frontend WIP">
-      <change afterPath="$PROJECT_DIR$/k8-setup/deploy.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8-setup/docker-desktop-k8s.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/k8-setup/K8s-README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_frontend/src/services/eventService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/admin_frontend/src/services/eventService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_sync_service/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/admin_sync_service/wait-for-it.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/customer_backend/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/context/AuthContext.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/customer_frontend/src/services/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customer_sync_service/wait-for-it.sh" beforeDir="false" afterPath="$PROJECT_DIR$/customer_sync_service/wait-for-it.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +60,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "kubernetes-migration",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/danie/IdeaProjects/SoftwareUdvikling/DLS/TicketBookingSystem/customer_frontend",
     "node.js.detected.package.eslint": "true",
@@ -124,7 +117,7 @@
       <workItem from="1745390459815" duration="65000" />
       <workItem from="1745390536813" duration="626000" />
       <workItem from="1745394154320" duration="22581000" />
-      <workItem from="1748246163092" duration="13244000" />
+      <workItem from="1748246163092" duration="14100000" />
     </task>
     <task id="LOCAL-00001" summary="merge w. main">
       <option name="closed" value="true" />
