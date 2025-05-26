@@ -41,4 +41,4 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
     console.error('Error fetching ticket:', error);
     throw error;
   }
-}; 
+};

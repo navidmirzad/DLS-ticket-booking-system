@@ -1,27 +1,15 @@
 import { getMySQLConnection } from "./mysql.js";
 
 export const syncToMySQL = async (data) => {
+  console.log("Syncing to MySQL:", data);
   const connection = getMySQLConnection();
   try {
     if (data.type === "OrderCreated") {
-      for(const ticket of data.tickets) {
-        await connection.execute(
-          "INSERT INTO TICKETS(id, event_id, price, type, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?)",
-          [
-            ticket.ticket_id,
-            data.eventId,
-            ticket.ticket_price,
-            ticket.__type,
-            formatDateForMySQL(ticket.created_at),
-            formatDateForMySQL(ticket.updated_at)
-          ]
-        )
-      };
 
       await connection.execute(
         "INSERT INTO ORDERS(id, email, tickets_bought, total_price, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
-          data.order.id,
+          data.order.order_id,
           data.order.email,
           data.order.tickets_bought.length,
           data.order.total_price,
@@ -30,6 +18,21 @@ export const syncToMySQL = async (data) => {
           formatDateForMySQL(data.order.updated_at)
         ]
       );
+
+      for(const ticket of data.tickets) {
+        await connection.execute(
+          "INSERT INTO TICKETS(id, event_id, price, type, created_at, updated_at, order_id) VALUES(?, ?, ?, ?, ?, ?, ?)",
+          [
+            ticket.ticket_id,
+            data.eventId,
+            ticket.ticket_price,
+            ticket.__type,
+            formatDateForMySQL(ticket.created_at),
+            formatDateForMySQL(ticket.updated_at),
+            data.order.order_id
+          ]
+        )
+      };
 
       await connection.execute(
         "UPDATE EVENT SET tickets_available = ? WHERE id = ?",
@@ -40,11 +43,32 @@ export const syncToMySQL = async (data) => {
 
       )
       
-    } else if (data.type === "OrderDeleted") {
+    } else if (data.type === "TICKET_REFUNDED") {
       await connection.execute(
-        "UPDATE orders SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?",
-        [data.payload.mysql_id]
+        "UPDATE TICKETS SET deleted_at = ?, updated_at = ? WHERE id = ?",
+        [
+          formatDateForMySQL(data.deletedAt),
+          formatDateForMySQL(data.deletedAt),
+          data.id
+        ]
       );
+
+      await connection.execute(
+        "UPDATE ORDERS SET tickets_bought = tickets_bought - 1, updated_at = ?, total_price = ? WHERE id = ?",
+        [
+          formatDateForMySQL(data.deletedAt),
+          data.newTotalPrice,
+          data.orderId,
+        ]
+      )
+
+      await connection.execute(
+        "UPDATE EVENT SET tickets_available = ? WHERE id = ?",
+        [
+          data.ticketsAvailable,
+          data.eventId
+        ]
+      )
     
     }
     

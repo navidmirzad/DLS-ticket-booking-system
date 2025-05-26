@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, User, Calendar, Download, MapPin, Clock, CreditCard, X } from 'lucide-react';
+import { Ticket, User, Calendar, Download, MapPin, Clock, CreditCard, X, Trash } from 'lucide-react';
 import { getMyOrders } from '../services/orderService';
 import type { Order, OrderTicket } from '../services/orderService';
 import { getTicketById } from '../services/ticketService';
-import { getEventById } from '../services/api';
+import { getEventById, refundTicket } from '../services/api';
 import type { SimpleEvent } from '../services/api';
 import { formatShortDate, formatTime } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -270,6 +270,26 @@ const AccountPage: React.FC = () => {
     setSelectedTicket(ticketItem);
   };
 
+  const handleDeleteTicket = async (ticketItem: TicketDetails) => {
+      try {
+        console.log('Deleting ticket:', ticketItem);
+        // Call the API to delete the ticket
+        await refundTicket(ticketItem.ticket_id);
+
+        // Update the orders state to remove the deleted ticket
+        
+        setOrders(currentOrders => 
+          currentOrders.map(order => ({
+            ...order,
+            tickets_bought: order.tickets_bought.filter(t => t.ticket_id !== ticketItem.ticket_id)
+          }))
+        );
+      } catch (err) {
+        console.error('Error deleting ticket:', err);
+        setError('Failed to delete ticket');
+      }
+    }
+
   return (
     <div className="bg-primary py-12">
       <div className="container-custom">
@@ -378,7 +398,7 @@ const AccountPage: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                       >
-                        {order.tickets_bought?.map((ticketItem, ticketIndex) => (
+                        {order.tickets_bought.map((ticketItem, ticketIndex) => (
                           <div key={`${order._id}-${ticketIndex}`} className="grid grid-cols-1 md:grid-cols-4 border-b last:border-b-0 border-neutral-100">
                             <div className="md:col-span-3 p-6">
                               <div className="mb-4">
@@ -451,6 +471,14 @@ const AccountPage: React.FC = () => {
                                   >
                                     <Ticket className="h-4 w-4 mr-2" strokeWidth={1.5} />
                                     View Details
+                                  </button>
+
+                                  <button 
+                                    className="btn py-2 px-3 text-sm flex items-center bg-red-500 text-white hover:bg-red-600"
+                                    onClick={() => handleDeleteTicket(ticketItem)}
+                                  >
+                                    <Trash className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                                    Delete
                                   </button>
                                 </div>
                               </div>

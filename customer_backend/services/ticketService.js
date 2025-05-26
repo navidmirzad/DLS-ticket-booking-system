@@ -15,7 +15,7 @@ export const getTicketByID = async (ticketId) => {
   return await Ticket.findOne({ ticket_id: ticketId });
 };
 
-export const createTicket = async (eventId, email, tickets) => {
+export const createTicket = async (eventId, email, quantity) => {
   const event = await getEventByID(eventId);
 
   if (!event) {
@@ -29,10 +29,6 @@ export const createTicket = async (eventId, email, tickets) => {
   // Fixed price for all tickets
   const ticketPrice = 50;
 
-  // Process each ticket in the tickets array
-  for (const ticketItem of tickets) {
-    const { quantity } = ticketItem;
-
     // Create individual tickets for this quantity
     for (let i = 0; i < quantity; i++) {
       const newTicket = new Ticket({
@@ -44,17 +40,16 @@ export const createTicket = async (eventId, email, tickets) => {
       await decreaseCapacity(eventId);
       const savedTicket = await newTicket.save();
       createdIndividualTickets.push(savedTicket);
+
+      ticketsForOrder.push({
+        ticket_id: savedTicket.ticket_id,
+        quantity: 1
+      });
     }
 
-    // Add to tickets for order array
-    ticketsForOrder.push({
-      ticket_id: ticketItem.ticket_id,
-      quantity: ticketItem.quantity
-    });
 
     // Calculate total price for this ticket type
     totalPrice += ticketPrice * quantity;
-  }
 
   const order = new Order({
     order_id: uuidv4(),
@@ -103,10 +98,47 @@ export const deleteTicket = async (ticketId) => {
     throw new Error("Ticket not found");
   }
 
+  const CURRENT_TIMESTAMP = new Date();
+
   await increaseCapacity(ticket.event_id);
-  return await Ticket.findOneAndUpdate(
+  const deletedTicket = await Ticket.findOneAndUpdate(
     { ticket_id: ticketId },
-    { deleted_at: new Date() },
+    {
+      deleted_at: CURRENT_TIMESTAMP,
+      updated_at: CURRENT_TIMESTAMP
+    },
     { new: true }
   );
+
+  const event = await getEventByID(deletedTicket.event_id);
+  console.log("Event found:", event);
+
+  const order = await Order.findOne(
+    { "tickets_bought.ticket_id": deletedTicket.ticket_id }
+  );
+
+  console.log("Order found:", order);
+
+  const newTotalPrice = order.total_price - deletedTicket.ticket_price;
+
+  await Order.findOneAndUpdate(
+    { order_id: order.order_id },
+    {
+      total_price: newTotalPrice,
+      updated_at: CURRENT_TIMESTAMP
+    },
+    { new: true }
+  );
+
+  await sendTicketToQueue({
+    type: "TICKET_REFUNDED",
+    id: deletedTicket.ticket_id,
+    orderId: order.order_id,
+    eventId: event.id,
+    deletedAt: CURRENT_TIMESTAMP,
+    newTotalPrice: newTotalPrice,
+    ticketsAvailable: event.tickets_available
+  });
+
+  return deletedTicket;
 };
