@@ -46,6 +46,7 @@ export const createTicket = async (eventId, email, tickets) => {
       createdIndividualTickets.push(savedTicket);
     }
 
+    
     // Add to tickets for order array
     ticketsForOrder.push({
       ticket_id: ticketItem.ticket_id,

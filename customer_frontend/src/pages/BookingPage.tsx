@@ -263,7 +263,6 @@ const BookingPage: React.FC = () => {
                             placeholder="John"
                             value={formData.firstName}
                             onChange={handleChange}
-                            readOnly={isAuthenticated}
                         />
                       </div>
                       {errors.firstName && (
@@ -285,7 +284,7 @@ const BookingPage: React.FC = () => {
                             placeholder="Doe"
                             value={formData.lastName}
                             onChange={handleChange}
-                            readOnly={isAuthenticated}
+                            
                         />
                       </div>
                       {errors.lastName && (
@@ -307,7 +306,7 @@ const BookingPage: React.FC = () => {
                             placeholder="john.doe@example.com"
                             value={formData.email}
                             onChange={handleChange}
-                            readOnly={isAuthenticated}
+                            
                         />
                       </div>
                       {errors.email && (
@@ -329,7 +328,7 @@ const BookingPage: React.FC = () => {
                             placeholder="12 34 56 78"
                             value={formData.phone}
                             onChange={handleChange}
-                            readOnly={isAuthenticated && user?.phone}
+                            
                         />
                       </div>
                       {errors.phone && (
