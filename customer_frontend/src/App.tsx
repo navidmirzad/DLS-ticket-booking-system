@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import EventsPage from './pages/EventsPage';
 import EventDetailPage from './pages/EventDetailPage';
 import BookingPage from './pages/BookingPage';
-import CheckoutPage from './pages/CheckoutPage';
+import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import AccountPage from './pages/AccountPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -17,7 +17,7 @@ function App() {
         <Route path="events" element={<EventsPage />} />
         <Route path="events/:id" element={<EventDetailPage />} />
         <Route path="booking/:id" element={<BookingPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="booking-confirmation" element={<BookingConfirmationPage />} />
         <Route path="account" element={<AccountPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

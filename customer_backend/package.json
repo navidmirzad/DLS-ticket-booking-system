@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
+    "stripe": "^18.1.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

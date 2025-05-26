@@ -9,17 +9,18 @@ import {
   CreditCard,
   User,
   Mail,
-  Phone,
-  Info
+  Phone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   getEventById,
   getTicketTypesForEvent,
+  createCheckoutSession,
   SimpleEvent,
   TicketType
 } from '../services/api';
 import { formatShortDate, formatTime } from '../utils/dateUtils';
+import { useAuth } from '../context/AuthContext';
 
 // Safe formatting functions with fallbacks
 const safeFormatShortDate = (dateString: string | Date | undefined | null): string => {
@@ -28,7 +29,7 @@ const safeFormatShortDate = (dateString: string | Date | undefined | null): stri
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Date TBD";
     return formatShortDate(String(dateString));
-  } catch (e) {
+  } catch {
     return "Date TBD";
   }
 };
@@ -39,25 +40,26 @@ const safeFormatTime = (dateString: string | Date | undefined | null): string =>
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Time TBD";
     return formatTime(String(dateString));
-  } catch (e) {
+  } catch {
     return "Time TBD";
   }
 };
 
 const BookingPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: eventId } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1', 10);
   const ticketTypeId = searchParams.get('ticketType') || '';
 
   // State for the event data, ticket types, loading, and error handling
   const [event, setEvent] = useState<SimpleEvent | null>(null);
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
   const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -67,36 +69,44 @@ const BookingPage: React.FC = () => {
     agreeToTerms: false
   });
 
+  // Auto-fill form data when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Split the name into first and last name
+      const nameParts = user.name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      setFormData(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: user.email,
+        phone: user.phone || prev.phone // Use existing phone if user.phone is not available
+      }));
+    }
+  }, [isAuthenticated, user]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Fetch event details and ticket types from the API
+  // Calculate pricing based on the selected ticket type
+  const ticketPrice = selectedTicketType?.price || 0;
+  const subtotal = ticketPrice * ticketCount;
+  const total = subtotal;
+
+  // Fetch event details
   useEffect(() => {
     const fetchEventData = async () => {
-      if (!id) return;
+      if (!eventId) return;
 
       try {
         setIsLoading(true);
-        console.log(`Fetching event with ID: ${id}`);
-
-        // Fetch event details
-        const eventData = await getEventById(id);
-        console.log('Fetched event data:', eventData);
-
-        // Fetch ticket types for this event
-        const ticketTypesData = await getTicketTypesForEvent(id);
-        console.log('Fetched ticket types:', ticketTypesData);
-
-        if (!eventData) {
-          throw new Error('Event not found');
-        }
-
+        const eventData = await getEventById(eventId);
+        const ticketTypesData = await getTicketTypesForEvent(eventId);
+        
         setEvent(eventData);
-        setTicketTypes(ticketTypesData);
-
-        // Find the selected ticket type
         const selectedType = ticketTypesData.find(type => type.id === ticketTypeId) || ticketTypesData[0];
         setSelectedTicketType(selectedType);
-
       } catch (err) {
         console.error('Error fetching event data:', err);
         setError('Failed to load event data');
@@ -106,7 +116,7 @@ const BookingPage: React.FC = () => {
     };
 
     fetchEventData();
-  }, [id, ticketTypeId]);
+  }, [eventId, ticketTypeId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -139,7 +149,7 @@ const BookingPage: React.FC = () => {
 
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s+/g, ''))) {
+    } else if (!/^[0-9]+$/.test(formData.phone.replace(/\s+/g, ''))) {
       newErrors.phone = 'Phone number is invalid';
     }
 
@@ -151,55 +161,57 @@ const BookingPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Navigate to checkout with all the relevant information
-      navigate('/checkout', {
-        state: {
-          eventId: id,
-          selectedTicketType: selectedTicketType,
-          ticketCount,
-          userInfo: {
-            ...formData,
-            name: `${formData.firstName} ${formData.lastName}`
-          }
-        }
-      });
+      try {
+        setIsProcessing(true);
+        const tickets = [{
+          ticket_id: selectedTicketType?.id || '',
+          quantity: ticketCount
+        }];
+
+        // Create checkout session and redirect to Stripe
+        const checkoutUrl = await createCheckoutSession({
+          amount: total,
+          tickets,
+          email: formData.email,
+          eventId
+        });
+
+        window.location.href = checkoutUrl;
+      } catch {
+        setError('Failed to initialize checkout');
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
   if (isLoading) {
     return (
-        <div className="container-custom py-20 text-center">
-          <h1 className="text-3xl font-bold text-text mb-4">Loading Event...</h1>
-          <p className="text-text-secondary mb-8">Please wait while we load the event details.</p>
-        </div>
+      <div className="container-custom py-20 text-center">
+        <h1 className="text-3xl font-bold text-text mb-4">Loading Event...</h1>
+        <p className="text-text-secondary mb-8">Please wait while we load the event details.</p>
+      </div>
     );
   }
 
   if (error || !event || !selectedTicketType) {
     return (
-        <div className="container-custom py-20">
-          <h1 className="text-3xl font-bold text-text mb-4">Event Not Found</h1>
-          <p className="text-text-secondary mb-6">{error || "The event doesn't exist or has been removed."}</p>
-
-          <button
-              onClick={() => navigate('/events')}
-              className="mt-6 btn btn-primary px-4 py-2 bg-accent text-white rounded-lg"
-          >
-            Browse Events
-          </button>
-        </div>
+      <div className="container-custom py-20">
+        <h1 className="text-3xl font-bold text-text mb-4">Event Not Found</h1>
+        <p className="text-text-secondary mb-6">{error || "The event doesn't exist or has been removed."}</p>
+        <button
+          onClick={() => navigate('/events')}
+          className="mt-6 btn btn-primary px-4 py-2 bg-accent text-white rounded-lg"
+        >
+          Browse Events
+        </button>
+      </div>
     );
   }
-
-  // Calculate pricing based on the selected ticket type
-  const ticketPrice = selectedTicketType.price;
-  const subtotal = ticketPrice * ticketCount;
-  const serviceFee = subtotal * 0.15; // 15% service fee
-  const total = subtotal + serviceFee;
 
   // Default image if none is provided
   const defaultImage = event.image || 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg';
@@ -208,7 +220,7 @@ const BookingPage: React.FC = () => {
       <div className="bg-primary py-12">
         <div className="container-custom">
           <button
-              onClick={() => navigate(`/events/${id}`)}
+              onClick={() => navigate(`/events/${eventId}`)}
               className="flex items-center text-text hover:text-accent mb-6 transition-all duration-300"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -228,7 +240,11 @@ const BookingPage: React.FC = () => {
               >
                 <div className="border-b border-neutral-100 p-6">
                   <h2 className="text-xl font-bold text-text">Your Information</h2>
-                  <p className="text-neutral-500 text-sm">We'll use this information for your booking</p>
+                  <p className="text-neutral-500 text-sm">
+                    {isAuthenticated 
+                      ? 'Your information has been pre-filled from your account'
+                      : "We'll use this information for your booking"}
+                  </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
@@ -247,6 +263,7 @@ const BookingPage: React.FC = () => {
                             placeholder="John"
                             value={formData.firstName}
                             onChange={handleChange}
+                            readOnly={isAuthenticated}
                         />
                       </div>
                       {errors.firstName && (
@@ -268,6 +285,7 @@ const BookingPage: React.FC = () => {
                             placeholder="Doe"
                             value={formData.lastName}
                             onChange={handleChange}
+                            readOnly={isAuthenticated}
                         />
                       </div>
                       {errors.lastName && (
@@ -289,6 +307,7 @@ const BookingPage: React.FC = () => {
                             placeholder="john.doe@example.com"
                             value={formData.email}
                             onChange={handleChange}
+                            readOnly={isAuthenticated}
                         />
                       </div>
                       {errors.email && (
@@ -306,10 +325,11 @@ const BookingPage: React.FC = () => {
                             type="tel"
                             id="phone"
                             name="phone"
-                            className={`input pl-8 ${errors.phone ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
-                            placeholder="+1 (123) 456-7890"
+                            className={`input pl-10 ${errors.phone ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                            placeholder="12 34 56 78"
                             value={formData.phone}
                             onChange={handleChange}
+                            readOnly={isAuthenticated && user?.phone}
                         />
                       </div>
                       {errors.phone && (
@@ -340,9 +360,10 @@ const BookingPage: React.FC = () => {
                   <div className="pt-4 border-t border-neutral-100">
                     <button
                         type="submit"
-                        className="btn btn-primary w-full"
+                        disabled={isProcessing}
+                        className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Continue to Payment
+                      {isProcessing ? 'Processing...' : 'Continue to Payment'}
                     </button>
                   </div>
                 </form>
@@ -390,10 +411,6 @@ const BookingPage: React.FC = () => {
                     <div className="flex justify-between mb-2">
                       <span className="text-neutral-600">{selectedTicketType.name} × {ticketCount}</span>
                       <span className="font-medium text-text">${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-neutral-600">Service Fee</span>
-                      <span className="font-medium text-text">${serviceFee.toFixed(2)}</span>
                     </div>
                   </div>
 
