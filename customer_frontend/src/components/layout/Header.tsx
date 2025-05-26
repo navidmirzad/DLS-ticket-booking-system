@@ -26,35 +26,39 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
     >
       <div className="container-custom">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <Ticket className="h-8 w-8 text-accent" strokeWidth={1.5} />
-            <span className="ml-2 text-2xl font-bold font-heading text-text">Eventix</span>
-          </Link>
+          {/* Logo Section - Fixed width */}
+          <div className="w-[200px]">
+            <Link to="/" className="flex items-center">
+              <Ticket className="h-18 w-18 text-accent" strokeWidth={1.5} />
+              <span className="ml-2 text-2xl font-bold font-heading text-text">Eventix</span>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <NavLink to="/" className={({ isActive }) => 
-              `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
-            }>
-              Home
-            </NavLink>
-            <NavLink to="/events" className={({ isActive }) => 
-              `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
-            }>
-              Events
-            </NavLink>
-            {isAuthenticated && (
-              <NavLink to="/account" className={({ isActive }) => 
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden md:flex items-center justify-center flex-1">
+            <div className="flex items-center space-x-12">
+              <NavLink to="/" className={({ isActive }) => 
                 `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
               }>
-                My Tickets
+                Home
               </NavLink>
-            )}
+              <NavLink to="/events" className={({ isActive }) => 
+                `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
+              }>
+                Events
+              </NavLink>
+              {isAuthenticated && (
+                <NavLink to="/account" className={({ isActive }) => 
+                  `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
+                }>
+                  My Tickets
+                </NavLink>
+              )}
+            </div>
           </nav>
 
-          {/* Header Actions */}
-          <div className="flex items-center space-x-4">
+          {/* Header Actions - Fixed width to match logo section */}
+          <div className="w-[200px] flex items-center justify-end space-x-4">
             <button
               onClick={toggleSearch}
               className="p-2 rounded-full hover:bg-secondary transition-all duration-300"
@@ -66,12 +70,12 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
             {isAuthenticated ? (
               <div className="hidden md:flex items-center space-x-4">
                 <Link to="/account" className="flex items-center space-x-2 p-2 rounded-full hover:bg-secondary transition-all duration-300">
-                  <User className="h-5 w-5 text-text" />
-                  <span className="text-sm font-medium">{user?.name}</span>
+                  <User className="h-5 w-5 text-text flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">{user?.name}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="p-2 rounded-full hover:bg-secondary transition-all duration-300"
+                  className="p-2 rounded-full hover:bg-secondary transition-all duration-300 flex-shrink-0"
                   title="Logout"
                 >
                   <LogOut className="h-5 w-5 text-text" />

@@ -1,12 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosResponse as AxiosOriginalResponse } from 'axios';
 
-type AxiosResponse<T = unknown> = {
-  data: T;
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
-  config: Record<string, unknown>;
-};
+type AxiosResponse<T = unknown> = AxiosOriginalResponse<T>;
 
 const API_URL = 'http://localhost:3002';
 
@@ -76,6 +70,7 @@ export interface OrderTicket {
 export interface Order {
   _id: string;
   order_id: string;
+  event_id: string;
   email: string;
   tickets_bought: OrderTicket[];
   total_price: number;
@@ -83,11 +78,6 @@ export interface Order {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
-}
-
-interface BuyTicketResponsePayload {
-  tickets: Ticket[]; // Your existing Ticket interface should work for the items in this array
-  order: Order;    // Your (now updated) Order interface
 }
 
 // User interface from MongoDB model
@@ -245,23 +235,19 @@ export const getTicketsByUserId = async (userId: string): Promise<Order[]> => {
 
 // Buy a ticket
 export const buyTicket = async (
-    eventId: string,
-    userId: string,
-    email: string,
-    ticketsBought: Array<{ ticketId: string; quantity: number }>,
+  eventId: string,
+  email: string,
+  tickets: Array<{ ticket_id: string; quantity: number }>,
+  paymentIntentId?: string
 ): Promise<Order> => {
   try {
+    const response = await api.post<{ order: Order }>('/api/ticket', {
+      eventId,
+      email,
+      tickets,
+      payment_intent_id: paymentIntentId
+    });
 
-    // Expect the specific BuyTicketResponsePayload structure from the backend
-    const response: AxiosResponse<BuyTicketResponsePayload> = 
-        await api.post('/api/ticket', {
-          eventId: eventId,
-          quantity: ticketsBought[0].quantity,
-          email: email,
-          userId: userId
-        });
-
-    // Return the order data from the response
     return response.data.order;
   } catch (error) {
     console.error('Error buying ticket:', error);
@@ -303,6 +289,102 @@ export const getMyOrders = async (): Promise<Order[]> => {
     }
   } catch (error) {
     console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
+
+// Payment related interfaces
+interface CreatePaymentIntentRequest {
+  amount: number;
+  tickets: Array<{ ticket_id: string; quantity: number }>;
+  email: string;
+}
+
+interface CreatePaymentIntentResponse {
+  clientSecret: string;
+  paymentIntentId: string;
+}
+
+interface ConfirmPaymentRequest {
+  paymentIntentId: string;
+  tickets: Array<{ ticket_id: string; quantity: number }>;
+  email: string;
+}
+
+interface ConfirmPaymentResponse {
+  success: boolean;
+  order: Order;
+}
+
+// Create a payment intent
+export const createPaymentIntent = async (
+  data: CreatePaymentIntentRequest
+): Promise<CreatePaymentIntentResponse> => {
+  try {
+    const { data: responseData } = await api.post<CreatePaymentIntentResponse>('/api/payments/create-payment-intent', data);
+    return responseData;
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    throw error;
+  }
+};
+
+// Confirm payment and create order
+export const confirmPayment = async (
+  data: ConfirmPaymentRequest
+): Promise<ConfirmPaymentResponse> => {
+  try {
+    const { data: responseData } = await api.post<ConfirmPaymentResponse>('/api/payments/confirm-payment', data);
+    return responseData;
+  } catch (error) {
+    console.error('Error confirming payment:', error);
+    throw error;
+  }
+};
+
+// Checkout related interfaces
+interface CreateCheckoutSessionRequest {
+  amount: number;
+  tickets: Array<{ ticket_id: string; quantity: number }>;
+  email: string;
+  eventId: string;
+}
+
+interface CreateCheckoutSessionResponse {
+  url: string;
+}
+
+// Create a checkout session
+export const createCheckoutSession = async (
+  data: CreateCheckoutSessionRequest
+): Promise<string> => {
+  try {
+    const response = await api.post<CreateCheckoutSessionResponse>('/api/payments/create-checkout-session', data);
+    
+    if (!response.data.url) {
+      throw new Error('No checkout URL received');
+    }
+    
+    return response.data.url;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
+};
+
+interface VerifyBookingSessionResponse {
+  success: boolean;
+  order: Order;
+  error?: string;
+}
+
+// Verify booking session
+export const verifyBookingSession = async (sessionId: string): Promise<VerifyBookingSessionResponse> => {
+  try {
+    const { data } = await api.get<VerifyBookingSessionResponse>(`/api/payments/success?session_id=${sessionId}`);
+    return data;
+  } catch (error) {
+    console.error('Error verifying booking session:', error);
     throw error;
   }
 };

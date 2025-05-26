@@ -25,6 +25,9 @@ app.use(eventRouter);
 import orderRouter from "./routes/orderRouter.js";
 app.use('/api/orders', orderRouter);
 
+import paymentRoutes from './routes/paymentRoutes.js';
+app.use('/api/payments', paymentRoutes);
+
 import { connectRabbit, consumeQueue } from "./util/rabbitmq.js";
 await connectRabbit();
 await consumeQueue();
