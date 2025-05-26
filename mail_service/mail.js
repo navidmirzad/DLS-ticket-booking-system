@@ -45,8 +45,14 @@ export const sendMail = async(message) => {
         currency: 'USD'
     }).format(message.ticket.price);
 
+    // Calculate total price
+    const totalPrice = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(message.ticket.price * message.quantity);
+
     // Create a ticket reference code
-    const ticketRef = `TKT-${message.ticket.id.substring(0, 8).toUpperCase()}`;
+    const orderRef = `ORD-${message.orderId.substring(0, 8).toUpperCase()}`;
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -69,7 +75,7 @@ export const sendMail = async(message) => {
                 padding: 20px;
             }
             .header {
-                background-color: #4a154b;
+                background-color: #2463eb;
                 padding: 20px;
                 text-align: center;
                 color: white;
@@ -103,17 +109,19 @@ export const sendMail = async(message) => {
                 margin-bottom: 10px;
                 border-bottom: 1px solid #eeeeee;
                 padding-bottom: 10px;
+                gap: 10px;
             }
             .ticket-label {
                 font-weight: bold;
                 color: #666666;
+                margin-right: 5px;
             }
             .ticket-value {
                 text-align: right;
             }
             .btn {
                 display: inline-block;
-                background-color: #4a154b;
+                background-color: #2463eb;
                 color: white;
                 text-decoration: none;
                 padding: 12px 25px;
@@ -132,24 +140,31 @@ export const sendMail = async(message) => {
                 padding: 15px;
                 margin: 20px 0;
             }
+            .price-summary {
+                background-color: #f0f9ff;
+                border: 1px solid #bde3ff;
+                border-radius: 5px;
+                padding: 15px;
+                margin: 20px 0;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>Ticket Confirmation</h1>
+                <h1>Order Confirmation</h1>
                 <p>Thank you for your purchase!</p>
             </div>
             
             <div class="content">
                 <p>Hello,</p>
                 
-                <p>Your ticket purchase was successful! We're excited to confirm your ticket for <strong>${message.event.title}</strong>.</p>
+                <p>Your ticket purchase was successful! We're excited to confirm your tickets for <strong>${message.event.title}</strong>.</p>
                 
                 <div class="ticket-info">
                     <div class="ticket-row">
-                        <span class="ticket-label">Ticket Reference:</span>
-                        <span class="ticket-value">${ticketRef}</span>
+                        <span class="ticket-label">Order Reference:</span>
+                        <span class="ticket-value">${orderRef}</span>
                     </div>
                     <div class="ticket-row">
                         <span class="ticket-label">Event:</span>
@@ -164,12 +179,19 @@ export const sendMail = async(message) => {
                         <span class="ticket-value">${message.event.location}</span>
                     </div>
                     <div class="ticket-row">
-                        <span class="ticket-label">Ticket Type:</span>
-                        <span class="ticket-value">${message.ticket.type}</span>
+                        <span class="ticket-label">Number of Tickets:</span>
+                        <span class="ticket-value">${message.quantity}</span>
                     </div>
+                </div>
+
+                <div class="price-summary">
                     <div class="ticket-row">
-                        <span class="ticket-label">Price:</span>
+                        <span class="ticket-label">Price per Ticket:</span>
                         <span class="ticket-value">${formattedPrice}</span>
+                    </div>
+                    <div class="ticket-row" style="border-bottom: 2px solid #bde3ff;">
+                        <span class="ticket-label">Total Amount:</span>
+                        <span class="ticket-value">${totalPrice}</span>
                     </div>
                 </div>
                 
@@ -181,10 +203,10 @@ export const sendMail = async(message) => {
                 </div>
                 
                 <div class="important-note">
-                    <strong>Important:</strong> Please bring a photo ID and your ticket reference number with you to the event.
+                    <strong>Important:</strong> Please bring a photo ID and your order reference number with you to the event.
                 </div>
                 
-                <p>If you have any questions about your ticket or the event, please contact our support team.</p>
+                <p>If you have any questions about your tickets or the event, please contact our support team.</p>
                 
                 <p>We look forward to seeing you there!</p>
                 
@@ -203,7 +225,7 @@ export const sendMail = async(message) => {
     await transporter.sendMail({
         from: '"Events DLS" <noreply@eventsdls.com>',
         to: message.to,
-        subject: `Your Ticket Confirmation - ${message.event.title}`,
+        subject: `Your Order Confirmation - ${message.event.title}`,
         html: emailHtml
     });
 

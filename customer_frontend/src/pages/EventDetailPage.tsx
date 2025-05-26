@@ -337,14 +337,10 @@ const EventDetailPage: React.FC = () => {
                               <span className="text-neutral-600">{currentTicketType.name || 'Standard Ticket'} × {selectedTickets}</span>
                               <span className="font-medium text-text">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between mb-2">
-                              <span className="text-neutral-600">Service Fee</span>
-                              <span className="font-medium text-text">${(currentTicketType.price * selectedTickets * 0.15).toFixed(2)}</span>
-                            </div>
                             <div className="border-t border-neutral-100 pt-2 mt-2">
                               <div className="flex justify-between">
                                 <span className="font-medium">Total</span>
-                                <span className="font-bold">${(currentTicketType.price * selectedTickets * 1.15).toFixed(2)}</span>
+                                <span className="font-bold">${(currentTicketType.price * selectedTickets).toFixed(2)}</span>
                               </div>
                             </div>
                           </div>

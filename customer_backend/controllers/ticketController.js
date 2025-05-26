@@ -39,10 +39,14 @@ export const getTicketsByUserID = async (req, res) => {
 
 export const buyTickets = async (req, res) => {
   try {
-    const { eventId, userId = "guest", email, quantity } = req.body;
+    const { eventId, email, tickets } = req.body;
 
-    const result = await createTicket(eventId, userId, email, quantity);
-    res.status(201).json(result);
+    if (!eventId || !email || !tickets || !Array.isArray(tickets)) {
+      return res.status(400).json({ error: 'Missing required fields or invalid format' });
+    }
+
+    const result = await createTicket(eventId, email, tickets);
+    res.status(201).json({ order: result });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

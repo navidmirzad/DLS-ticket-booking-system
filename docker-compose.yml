@@ -75,6 +75,7 @@ services:
       - DATABASE_URL=${MONGODB_URL_CUSTOMER}/${CUSTOMER_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
       - CUSTOMER_BACKEND_PORT=${CUSTOMER_BACKEND_PORT}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
     depends_on:
       - mongodb
       - rabbitmq
@@ -91,6 +92,9 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - CUSTOMER_FRONTEND=${CUSTOMER_FRONTEND}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - VITE_STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
     networks:
       - rabbitmq_network
 

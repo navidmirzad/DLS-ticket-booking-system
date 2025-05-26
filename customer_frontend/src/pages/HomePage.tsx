@@ -141,7 +141,7 @@ const HomePage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link to="/events?category=concert" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
                 <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-accent" />
+                  <Calendar className="h-24 w-24 text-accent" />
                 </div>
                 <h3 className="font-medium text-text mb-1">Concerts</h3>
                 <p className="text-sm text-text-secondary">Live music experiences</p>
@@ -149,7 +149,7 @@ const HomePage: React.FC = () => {
 
               <Link to="/events?category=sports" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
                 <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-accent" />
+                  <Calendar className="h-24 w-24 text-accent" />
                 </div>
                 <h3 className="font-medium text-text mb-1">Sports</h3>
                 <p className="text-sm text-text-secondary">Games & tournaments</p>
@@ -157,7 +157,7 @@ const HomePage: React.FC = () => {
 
               <Link to="/events?category=arts" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
                 <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-accent" />
+                  <Calendar className="h-24 w-24 text-accent" />
                 </div>
                 <h3 className="font-medium text-text mb-1">Arts & Culture</h3>
                 <p className="text-sm text-text-secondary">Exhibitions & theater</p>
@@ -165,7 +165,7 @@ const HomePage: React.FC = () => {
 
               <Link to="/events?category=workshop" className="bg-primary rounded-xl p-6 text-center hover:shadow-md transition-all duration-300">
                 <div className="bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-accent" />
+                  <Calendar className="h-24 w-24 text-accent" />
                 </div>
                 <h3 className="font-medium text-text mb-1">Workshops</h3>
                 <p className="text-sm text-text-secondary">Learn something new</p>
