@@ -37,18 +37,18 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
           {/* Desktop Navigation - Centered */}
           <nav className="hidden md:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-12">
-              <NavLink to="/" className={({ isActive }) => 
+              <NavLink to="/" className={({ isActive }) =>
                 `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
               }>
                 Home
               </NavLink>
-              <NavLink to="/events" className={({ isActive }) => 
+              <NavLink to="/events" className={({ isActive }) =>
                 `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
               }>
                 Events
               </NavLink>
               {isAuthenticated && (
-                <NavLink to="/account" className={({ isActive }) => 
+                <NavLink to="/account" className={({ isActive }) =>
                   `text-base font-medium transition-all duration-300 ${isActive ? 'text-accent' : 'text-text hover:text-accent'}`
                 }>
                   My Tickets

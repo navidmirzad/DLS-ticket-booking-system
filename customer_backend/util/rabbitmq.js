@@ -2,6 +2,7 @@ import amqp from "amqplib";
 import dotenv from "dotenv";
 import { Event } from "../models/mongo/index.js"; // Import the Event model
 import mongoose from "mongoose"; // Add this for MongoDB connection check
+import { sendEventUpdate } from "../controllers/eventController.js"; // Import SSE function
 
 dotenv.config();
 let channel;
@@ -75,4 +76,60 @@ export const consumeQueue = async () => {
     { noAck: true }
   );
   console.log("RabbitMQ consumer started for eventQueue.");
+
+  // Consume ticket queue for SSE updates
+  await channel.consume(
+    "ticketQueue",
+    async (msg) => {
+      if (msg !== null) {
+        try {
+          const ticketData = JSON.parse(msg.content.toString());
+          console.log("Ticket data received:", ticketData);
+
+          if (ticketData.type === "TICKET_BOUGHT" && ticketData.event && ticketData.event_id) {
+            // Find the event to get updated availability
+            const eventId = ticketData.event_id || ticketData.event.id;
+            if (eventId) {
+              // For SSE, we need to send an update to all clients listening for this event
+              const eventUpdate = {
+                type: "TICKET_PURCHASED",
+                eventId: eventId,
+                remainingTickets: null, // We'll update this with real data below
+                timestamp: new Date().toISOString()
+              };
+              
+              try {
+                // Get the updated event data to include latest ticket availability
+                // Use both id and _id fields to ensure we find the event
+                const event = await Event.findOne({ 
+                  $or: [
+                    { id: eventId },
+                    { _id: eventId }
+                  ]
+                });
+                
+                if (event) {
+                  console.log(`Found event with tickets_available: ${event.tickets_available}`);
+                  eventUpdate.remainingTickets = event.tickets_available;
+                  eventUpdate.eventTitle = event.title;
+                } else {
+                  console.log(`Event not found with ID: ${eventId}`);
+                }
+              } catch (error) {
+                console.error("Error fetching updated event data:", error);
+              }
+              
+              // Send the update to all connected SSE clients for this event
+              sendEventUpdate(eventId, eventUpdate);
+              console.log("Sent SSE update for event:", eventId, "with data:", eventUpdate);
+            }
+          }
+        } catch (error) {
+          console.error("Error processing ticket message:", error);
+        }
+      }
+    },
+    { noAck: true }
+  );
+  console.log("RabbitMQ consumer started for ticketQueue.");
 };

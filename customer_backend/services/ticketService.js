@@ -32,7 +32,7 @@ export const createTicket = async (eventId, email, tickets) => {
   // Process each ticket in the tickets array
   for (const ticketItem of tickets) {
     const { quantity } = ticketItem;
-    
+
     // Create individual tickets for this quantity
     for (let i = 0; i < quantity; i++) {
       const newTicket = new Ticket({
