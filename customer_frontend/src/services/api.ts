@@ -237,14 +237,14 @@ export const getTicketsByUserId = async (userId: string): Promise<Order[]> => {
 export const buyTicket = async (
   eventId: string,
   email: string,
-  tickets: Array<{ ticket_id: string; quantity: number }>,
+  quantity: number,
   paymentIntentId?: string
 ): Promise<Order> => {
   try {
     const response = await api.post<{ order: Order }>('/api/ticket', {
       eventId,
       email,
-      tickets,
+      quantity,
       payment_intent_id: paymentIntentId
     });
 

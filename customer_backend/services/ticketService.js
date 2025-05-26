@@ -15,7 +15,7 @@ export const getTicketByID = async (ticketId) => {
   return await Ticket.findOne({ ticket_id: ticketId });
 };
 
-export const createTicket = async (eventId, email, tickets) => {
+export const createTicket = async (eventId, email, quantity) => {
   const event = await getEventByID(eventId);
 
   if (!event) {
@@ -28,10 +28,6 @@ export const createTicket = async (eventId, email, tickets) => {
 
   // Fixed price for all tickets
   const ticketPrice = 50;
-
-  // Process each ticket in the tickets array
-  for (const ticketItem of tickets) {
-    const { quantity } = ticketItem;
     
     // Create individual tickets for this quantity
     for (let i = 0; i < quantity; i++) {
@@ -44,18 +40,16 @@ export const createTicket = async (eventId, email, tickets) => {
       await decreaseCapacity(eventId);
       const savedTicket = await newTicket.save();
       createdIndividualTickets.push(savedTicket);
-    }
 
+      ticketsForOrder.push({
+        ticket_id: savedTicket.ticket_id,
+        quantity: 1
+      });
+    }
     
-    // Add to tickets for order array
-    ticketsForOrder.push({
-      ticket_id: ticketItem.ticket_id,
-      quantity: ticketItem.quantity
-    });
 
     // Calculate total price for this ticket type
     totalPrice += ticketPrice * quantity;
-  }
 
   const order = new Order({
     order_id: uuidv4(),

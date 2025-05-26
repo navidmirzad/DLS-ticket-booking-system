@@ -67,11 +67,11 @@ export const getOrdersByUser = async (req, res) => {
 
       return {
         ...order.toObject(),
-        tickets_bought: tickets
+        tickets_bought: filteredTickets
       };
     });
 
-    res.json({ data: orders, tickets: f });
+    res.json({ data: filteredOrders });
   } catch (error) {
     console.error("Error getting orders:", error);
     res.status(500).json({ error: error.message });

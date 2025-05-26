@@ -36,10 +36,11 @@ const BookingConfirmationPage: React.FC = () => {
 
         if (verificationResult.success && verificationResult.order) {
           // Create the order and send confirmation email
+          const ticketInfo = verificationResult.order.tickets_bought?.[0]
           const order = await buyTicket(
             eventId,
             verificationResult.order.email,
-            verificationResult.order.tickets_bought,
+            ticketInfo.quantity,
             sessionId // Pass session_id as payment_intent_id
           );
 
