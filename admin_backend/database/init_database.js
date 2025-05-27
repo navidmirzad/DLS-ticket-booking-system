@@ -31,7 +31,7 @@ async function createDatabase() {
         title VARCHAR(255),
         image VARCHAR(255),
         capacity INT,
-        date DATE,
+        date DATETIME,
         description TEXT,
         location VARCHAR(255),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

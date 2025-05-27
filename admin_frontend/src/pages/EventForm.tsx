@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useParams } from "react-router-dom";
-import { fetchEventById } from "../services/eventService";
+import { fetchEventById, createEvent, updateEvent } from "../services/eventService";
 
 type EventFormData = {
   title: string;
@@ -8,7 +8,7 @@ type EventFormData = {
   date: string;
   location: string;
   image: string;
-  capacity: number; // Added capacity field
+  capacity: number;
 };
 
 const EventForm = () => {
@@ -21,7 +21,7 @@ const EventForm = () => {
     date: "",
     location: "",
     image: "",
-    capacity: 0, // Initialize capacity
+    capacity: 0,
   });
 
   const [status, setStatus] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const EventForm = () => {
           date: new Date(event.date).toISOString().slice(0, 16),
           location: event.location,
           image: event.image || "",
-          capacity: event.capacity, // Populate capacity
+          capacity: event.capacity,
         });
       })
       .catch(() => setStatus("Failed to load event"));
@@ -46,7 +46,7 @@ const EventForm = () => {
     const { name, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "capacity" ? parseInt(value, 10) || 0 : value, // Handle capacity as a number
+      [name]: name === "capacity" ? parseInt(value, 10) || 0 : value,
     }));
   };
 
@@ -54,27 +54,22 @@ const EventForm = () => {
     event.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/events${isEditMode ? `/${id}` : ""}`, {
-        method: isEditMode ? "PATCH" : "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}` 
-        },
-        body: JSON.stringify(formData),
-      });
+      const eventData = {
+        ...formData,
+        date: new Date(formData.date),
+      };
 
-      if (res.ok) {
-        const data = await res.json();
-        setStatus(isEditMode ? "Event updated!" : `Event created! ID: ${data.data}`);
-        if (!isEditMode) {
-          setFormData({ title: "", description: "", date: "", location: "", image: "", capacity: 0 });
-        }
+      if (isEditMode && id) {
+        await updateEvent(id, eventData);
+        setStatus("Event updated!");
       } else {
-        setStatus("Failed to submit event.");
+        await createEvent(eventData);
+        setStatus(`Event created successfully!`);
+        setFormData({ title: "", description: "", date: "", location: "", image: "", capacity: 0 });
       }
     } catch (err) {
       console.error(err);
-      setStatus("Error occurred.");
+      setStatus("Failed to submit event.");
     }
   };
 

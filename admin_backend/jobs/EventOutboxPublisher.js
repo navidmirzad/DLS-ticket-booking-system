@@ -50,12 +50,12 @@ const runPublisher = async () => {
   }
 };
 
-(async () => {
+export const startEventOutboxPublisher = async () => {
   try {
     await connectRabbit();
     await runPublisher();
   } catch (err) {
     console.error("Failed to start publisher:", err);
-    process.exit(1);
+    process.exit(1);  
   }
-})();
+};

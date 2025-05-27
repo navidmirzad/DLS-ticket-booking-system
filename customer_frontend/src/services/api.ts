@@ -2,7 +2,7 @@ import axios, { AxiosResponse as AxiosOriginalResponse } from 'axios';
 
 type AxiosResponse<T = unknown> = AxiosOriginalResponse<T>;
 
-const API_URL = 'http://localhost:3002';
+const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,

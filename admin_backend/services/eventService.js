@@ -65,13 +65,17 @@ const createEvent = async (eventData) => {
   try {
     await connection.beginTransaction();
 
+    // Convert ISO string to MySQL datetime format
+    const date = new Date(eventData.date);
+    const mysqlDatetime = date.toISOString().slice(0, 19).replace('T', ' ');
+
     const [descResult] = await connection.query(
       "INSERT INTO EVENT_DESCRIPTION (title, image, capacity, date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
       [
         eventData.title,
         eventData.image,
         eventData.capacity,
-        eventData.date,
+        mysqlDatetime,
         eventData.description,
         eventData.location,
       ]
@@ -123,6 +127,10 @@ const updateEvent = async (eventId, eventData) => {
 
     const descriptionId = eventRows[0].description_id;
 
+    // Convert ISO string to MySQL datetime format
+    const date = new Date(eventData.date);
+    const mysqlDatetime = date.toISOString().slice(0, 19).replace('T', ' ');
+
     await connection.query(
       `UPDATE EVENT_DESCRIPTION 
        SET title = ?, image = ?, date = ?, description = ?, location = ?
@@ -130,7 +138,7 @@ const updateEvent = async (eventId, eventData) => {
       [
         eventData.title,
         eventData.image,
-        eventData.date,
+        mysqlDatetime,
         eventData.description,
         eventData.location,
         descriptionId,

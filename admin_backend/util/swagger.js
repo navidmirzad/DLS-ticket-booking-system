@@ -10,8 +10,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
-        description: 'Local Development Server',
+        url: process.env.ADMIN_BACKEND,
+        description: 'Local Dev Server',
       },
     ],
     components: {

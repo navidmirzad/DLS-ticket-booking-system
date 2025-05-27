@@ -58,6 +58,7 @@ services:
       - AUTH_URL=${AUTH_URL}
       - ADMIN_FRONTEND=${ADMIN_FRONTEND}
       - ADMIN_BACKEND_PORT=${ADMIN_BACKEND_PORT}
+      - ADMIN_BACKEND=${ADMIN_BACKEND}
     depends_on:
       mysql:
         condition: service_healthy
@@ -83,7 +84,12 @@ services:
       - rabbitmq_network
 
   customer_frontend:
-    build: ./customer_frontend
+    build:
+      context: ./customer_frontend
+      args:
+        - VITE_BACKEND_API_URL=${VITE_BACKEND_API_URL}
+        - VITE_AUTH_API_URL=${VITE_AUTH_APU}
+        - VITE_STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
     ports:
       - "8080:80"
     depends_on:
@@ -93,7 +99,8 @@ services:
     environment:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - CUSTOMER_FRONTEND=${CUSTOMER_FRONTEND}
-      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - VITE_BACKEND_API_URL=${VITE_BACKEND_API_URL}
+      - VITE_AUTH_API_URL=${VITE_AUTH_APU}
       - VITE_STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
     networks:
       - rabbitmq_network

@@ -25,9 +25,9 @@ export async function seedMySQL() {
     const [descResults] = await connection.query(`
       INSERT INTO EVENT_DESCRIPTION (title, image, capacity, date, description, location)
       VALUES 
-        ('Summer Beats Festival', 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg', 500, '2025-07-15', 'A music fest with popular artists.', 'Central Park, NY'),
-        ('Tech Innovators 2025', 'https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg', 1000, '2025-09-20', 'Annual tech conference with keynotes.', 'SF Convention Center'),
-        ('Gourmet Gala', 'https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg', 300, '2025-08-05', 'Food and wine tasting event.', 'Chicago Expo Hall')
+        ('Summer Beats Festival', 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg', 500, '2025-07-15 14:00:00', 'A music fest with popular artists.', 'Central Park, NY'),
+        ('Tech Innovators 2025', 'https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg', 1000, '2025-09-20 09:00:00', 'Annual tech conference with keynotes.', 'SF Convention Center'),
+        ('Gourmet Gala', 'https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg', 300, '2025-08-05 18:00:00', 'Food and wine tasting event.', 'Chicago Expo Hall')
     `);
 
     const [[{ insertId: firstDescId }]] = await connection.query(

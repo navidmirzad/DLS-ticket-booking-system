@@ -5,12 +5,13 @@
 import dotenv from "dotenv";
 import express from "express";
 import { connectRabbit } from "./util/rabbitmq.js";
-/* import { isAuthenticated } from "./middleware/auth.js"; */
+/* import { isAuthenticated } from "./middleware/auth.js"; */´´
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpecs from "./util/swagger.js";
 import { seedMySQL } from "./database/seedMySQL.js";
+import { startEventOutboxPublisher } from "./jobs/EventOutboxPublisher.js";
 
 /**
  * Express application instance
@@ -37,6 +38,7 @@ app.use(
  * Configure request body parsing middleware
  */
 app.use(express.json());
+startEventOutboxPublisher();
 
 /**
  * Initialize services: RabbitMQ and Database
