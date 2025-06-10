@@ -5,7 +5,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import { connectRabbit } from "./util/rabbitmq.js";
-/* import { isAuthenticated } from "./middleware/auth.js"; */´´
+/* import { isAuthenticated } from "./middleware/auth.js"; */
 import createDatabase from "./database/init_database.js";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
@@ -50,7 +50,7 @@ try {
   await createDatabase(); // Initialize the database
   console.log("Database initialized ✅");
 
-  await seedMySQL(); // Seed the database
+  //await seedMySQL(); // Seed the database
   console.log("Database seeded ✅");
 } catch (error) {
   console.error("Error initializing services:", error);

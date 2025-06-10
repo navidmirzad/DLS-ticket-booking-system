@@ -22,10 +22,23 @@ export const connectRabbit = async () => {
   console.log("Connecting to RabbitMQ:", process.env.RABBITMQ_URL);
   const conn = await amqp.connect(process.env.RABBITMQ_URL);
   channel = await conn.createChannel();
-  await channel.assertQueue("eventQueue"); // Ensure the queue exists
-  await channel.assertQueue("ticketQueue"); // Ensure the ticketQueue exists
-  await channel.assertQueue("emailQueue"); // Ensure the emailQueue exists
+  await channel.assertQueue("eventQueue");
+  await channel.assertQueue("ticketQueue");
+  await channel.assertQueue("emailQueue");
   console.log("RabbitMQ connected and queues asserted.");
+
+  // Register consumer after (re)connect
+  await consumeQueue();
+
+  // Handle connection close/errors for auto-reconnect
+  conn.on("close", async () => {
+    console.error("RabbitMQ connection closed. Reconnecting...");
+    channel = null;
+    setTimeout(connectRabbit, 5000); // Retry after 5 seconds
+  });
+  conn.on("error", (err) => {
+    console.error("RabbitMQ connection error:", err);
+  });
 };
 
 export const sendToQueue = async (data) => {
@@ -50,29 +63,38 @@ export const consumeQueue = async () => {
         const event = JSON.parse(msg.content.toString());
         console.log("Event received:", event);
 
-        // Handle event (e.g., save to MongoDB)
-        if (event.type === "EventCreated") {
-          const { payload } = event;
-          console.log("Saving event to MongoDB. Payload:", payload);
-          try {
-            const saved = await Event.create(payload); // Save the event to MongoDB
+        try {
+          if (event.type === "EventCreated") {
+            const saved = await Event.create(event.payload);
             console.log("Event saved to MongoDB:", saved);
-          } catch (error) {
-            console.error(
-              "Error saving event to MongoDB:",
-              error,
-              "Payload:",
-              payload
+          } else if (event.type === "EventUpdated") {
+            const updated = await Event.findOneAndUpdate(
+              { id: String(event.payload.id) }, // always use string for id
+              event.payload,
+              { new: true }
             );
+            console.log("Event updated in MongoDB:", updated);
+          } else if (event.type === "EventDeleted") {
+            await Event.findOneAndDelete({ id: String(event.payload.id) });
+            console.log("Event deleted from MongoDB:", event.payload.id);
+          } else {
+            console.log("Unknown event type:", event.type);
           }
-        } else {
-          console.log("Unknown event type:", event.type);
+          channel.ack(msg); // Acknowledge only after successful processing
+        } catch (error) {
+          console.error(
+            "Error processing event:",
+            error,
+            "Payload:",
+            event.payload
+          );
+          // Optionally: don't ack, so message will be retried
         }
       } else {
         console.log("Received null message from eventQueue.");
       }
     },
-    { noAck: true }
+    { noAck: false } // Reliable delivery
   );
   console.log("RabbitMQ consumer started for eventQueue.");
 };

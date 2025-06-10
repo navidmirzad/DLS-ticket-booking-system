@@ -55,7 +55,10 @@ class Order {
   static async findById(id) {
     const connection = await this.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM ORDERS WHERE id = ? AND deleted_at IS NULL', [id]);
+      const [rows] = await connection.query(
+        "SELECT * FROM ORDERS WHERE id = ? AND deleted_at IS NULL",
+        [id]
+      );
       return rows.length ? new Order(rows[0]) : null;
     } finally {
       await connection.end();
@@ -72,8 +75,11 @@ class Order {
   static async findByEmail(email) {
     const connection = await this.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM ORDERS WHERE email = ? AND deleted_at IS NULL', [email]);
-      return rows.map(row => new Order(row));
+      const [rows] = await connection.query(
+        "SELECT * FROM ORDERS WHERE email = ? AND deleted_at IS NULL",
+        [email]
+      );
+      return rows.map((row) => new Order(row));
     } finally {
       await connection.end();
     }
@@ -94,8 +100,13 @@ class Order {
     const connection = await this.getConnection();
     try {
       const [result] = await connection.query(
-        'INSERT INTO ORDERS (email, tickets_bought, total_price, status) VALUES (?, ?, ?, ?)',
-        [orderData.email, orderData.tickets_bought, orderData.total_price, orderData.status]
+        "INSERT INTO ORDERS (email, tickets_bought, total_price, status) VALUES (?, ?, ?, ?)",
+        [
+          orderData.email,
+          orderData.tickets_bought,
+          orderData.total_price,
+          orderData.status,
+        ]
       );
       return result.insertId;
     } finally {
@@ -115,7 +126,7 @@ class Order {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE ORDERS SET status = ? WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE ORDERS SET status = ? WHERE id = ? AND deleted_at IS NULL",
         [status, orderId]
       );
     } finally {
@@ -134,7 +145,7 @@ class Order {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE ORDERS SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL',
+        "UPDATE ORDERS SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
         [orderId]
       );
     } finally {
@@ -153,7 +164,7 @@ class Order {
     const connection = await this.getConnection();
     try {
       await connection.query(
-        'UPDATE ORDERS SET deleted_at = NULL WHERE id = ?',
+        "UPDATE ORDERS SET deleted_at = NULL WHERE id = ?",
         [orderId]
       );
     } finally {
@@ -162,4 +173,4 @@ class Order {
   }
 }
 
-export default Order; 
+export default Order;

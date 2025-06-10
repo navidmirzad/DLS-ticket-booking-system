@@ -7,11 +7,11 @@ dotenv.config();
 const POLL_INTERVAL_MS = 5000;
 
 const dbConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: "mysql",
+  port: 3306,
+  user: "admin",
+  password: "adminpassword",
+  database: "admin_db",
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,7 +28,10 @@ const runPublisher = async () => {
         try {
           await publishEvent({
             type: row.event_type,
-            payload: row.payload,
+            payload:
+              typeof row.payload === "string"
+                ? JSON.parse(row.payload)
+                : row.payload,
           });
 
           await connection.query(
@@ -39,6 +42,7 @@ const runPublisher = async () => {
           console.log(`[✅] Published outbox event ${row.id}`);
         } catch (err) {
           console.error(`[❌] Failed to publish outbox event ${row.id}`, err);
+          // Do not update as published if publishEvent fails!
         }
       }
     } catch (err) {
@@ -50,12 +54,21 @@ const runPublisher = async () => {
   }
 };
 
+/**
+ * Starts the event outbox publisher with robust RabbitMQ reconnect logic.
+ * Keeps retrying RabbitMQ connection and polling the outbox.
+ */
 export const startEventOutboxPublisher = async () => {
-  try {
-    await connectRabbit();
-    await runPublisher();
-  } catch (err) {
-    console.error("Failed to start publisher:", err);
-    process.exit(1);  
+  while (true) {
+    try {
+      await connectRabbit();
+      await runPublisher();
+    } catch (err) {
+      console.error(
+        "Failed to start publisher or lost connection. Retrying in 5s...",
+        err
+      );
+      await sleep(5000);
+    }
   }
 };
