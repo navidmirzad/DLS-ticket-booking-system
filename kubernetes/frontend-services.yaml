@@ -16,6 +16,7 @@ spec:
       containers:
       - name: admin-frontend
         image: samimms/admin-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 81
 ---

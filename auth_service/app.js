@@ -4,34 +4,13 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import cors from "cors";
 import User from "./models/userModel.js"; // Import your User model
+import connectMongo from "./db/mongo.js";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(
-  cors({
-    origin: [
-      process.env.ADMIN_BACKEND,
-      process.env.ADMIN_FRONTEND,
-      process.env.CUSTOMER_BACKEND,
-      process.env.CUSTOMER_FRONTEND,
-    ],
-  })
-);
-
-const connectToDatabase = async () => {
-  try {
-    await mongoose.connect(process.env.DATABASE_URL);
-    console.log("MongoDB connected");
-
-    // Add seed admin user functionality here
-    await seedAdminUser();
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  }
-};
+app.use(cors());
 
 // Function to seed admin user
 const seedAdminUser = async () => {
@@ -61,7 +40,9 @@ const seedAdminUser = async () => {
   }
 };
 
-await connectToDatabase();
+// Connect to MongoDB and seed admin user
+await connectMongo();
+await seedAdminUser();
 
 app.use("/api/auth", authRoutes);
 

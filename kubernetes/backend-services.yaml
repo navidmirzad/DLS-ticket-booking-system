@@ -16,13 +16,14 @@ spec:
       containers:
       - name: auth-service
         image: samimms/auth-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
         - name: NODE_ENV
-          value: ${NODE_ENV}
+          value: "development"
         - name: DATABASE_URL
-          value: "mongodb://mongodb-auth:27017/${AUTH_DB}"
+          value: "mongodb://mongodb-auth:27017/auth_db"
         - name: RABBITMQ_URL
           value: "amqp://admin:admin@rabbitmq:5672"
         - name: JWT_SECRET
@@ -31,13 +32,13 @@ spec:
               name: jwt-secret
               key: JWT_SECRET
         - name: JWT_EXPIRES_IN
-          value: ${JWT_EXPIRES_IN}
+          value: "1d"
         - name: ADMIN_FRONTEND
-          value: ${ADMIN_FRONTEND}
+          value: "http://localhost:8081"
         - name: ADMIN_BACKEND
-          value: ${ADMIN_BACKEND}
+          value: "http://localhost:3001"
         - name: CUSTOMER_FRONTEND
-          value: ${CUSTOMER_FRONTEND}
+          value: "http://localhost:8080"
 ---
 apiVersion: v1
 kind: Service

@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     created_at: { type: Date, default: Date.now },
+}, {
+    collection: 'users'  // Explicitly set the collection name
 });
 
 userSchema.pre('save', async function () {

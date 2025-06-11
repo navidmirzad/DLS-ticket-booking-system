@@ -24,15 +24,7 @@ dotenv.config();
 /**
  * Configure CORS middleware
  */
-app.use(
-  cors({
-    origin: [
-      process.env.LOCAL_ENV,
-      process.env.ADMIN_FRONTEND,
-      process.env.AUTH_ENV,
-    ],
-  })
-);
+app.use(cors());
 
 /**
  * Configure request body parsing middleware

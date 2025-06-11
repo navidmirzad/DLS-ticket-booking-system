@@ -6,6 +6,6 @@ metadata:
 data:
   VITE_LOGIN_URL: "http://auth-service:3000/api/auth/login"
   VITE_ADMIN_BACKEND_URL: "http://admin-backend:3001"
-  VITE_VALIDATE_TOKEN_URL: "http://auth-service:3000/api/auth/validate"
+  VITE_VALIDATE_TOKEN_URL: "http://auth-service:3000/api/auth/me"
   VITE_BACKEND_API_URL: "http://customer-backend:3002"
   VITE_AUTH_API_URL: "http://auth-service:3000" 

@@ -1,6 +1,6 @@
 import { Event } from "../types/Event";
 
-const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL;
+const ADMIN_BACKEND_URL = 'http://localhost:3001/api/admin'
 
 type EventInput = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'tickets_available' | 'tickets'>;
 
