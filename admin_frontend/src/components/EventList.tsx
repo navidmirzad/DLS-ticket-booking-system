@@ -20,6 +20,9 @@ const EventList = ({ events }: Props) => {
           <EventCard key={event.id} event={event} />
         ))}
       </div>
+      {events.length === 0 && (
+         <div className="text-center text-gray-500">No events found</div>
+       )}
     </div>
   );
 };

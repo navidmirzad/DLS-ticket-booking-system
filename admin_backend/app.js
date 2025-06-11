@@ -49,7 +49,7 @@ try {
   await createDatabase().then(() => {
     console.log("Database initialized ✅");
     startEventOutboxPublisher();
-    seedMySQL();
+    // seedMySQL();
   });
 
   console.log("Database seeded ✅");
