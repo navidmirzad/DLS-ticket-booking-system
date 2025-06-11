@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { fetchEventById, createEvent, updateEvent } from "../services/eventService";
+import { useNavigate } from "react-router-dom";
 
 type EventFormData = {
   title: string;
@@ -14,6 +15,7 @@ type EventFormData = {
 const EventForm = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
@@ -66,6 +68,7 @@ const EventForm = () => {
         await createEvent(eventData);
         setStatus(`Event created successfully!`);
         setFormData({ title: "", description: "", date: "", location: "", image: "", capacity: 0 });
+        navigate("/");
       }
     } catch (err) {
       console.error(err);

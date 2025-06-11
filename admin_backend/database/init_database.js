@@ -10,6 +10,7 @@ dotenv.config();
  * - EVENT: Stores event records with references to descriptions
  * - TICKETS: Stores ticket information for events
  * - ORDERS: Stores customer orders
+ * - EVENT_OUTBOX: Stores events to be published to message queue
  *
  * @async
  * @returns {Promise<void>}
@@ -87,7 +88,7 @@ async function createDatabase() {
         published BOOLEAN DEFAULT FALSE,
         published_at TIMESTAMP NULL DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+      )
     `);
 
     console.log("Database and tables created successfully");

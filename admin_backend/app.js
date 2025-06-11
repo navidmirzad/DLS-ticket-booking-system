@@ -38,7 +38,6 @@ app.use(
  * Configure request body parsing middleware
  */
 app.use(express.json());
-startEventOutboxPublisher();
 
 /**
  * Initialize services: RabbitMQ and Database
@@ -47,10 +46,12 @@ try {
   await connectRabbit(); // Connect to RabbitMQ
   console.log("RabbitMQ connected ✅");
 
-  await createDatabase(); // Initialize the database
-  console.log("Database initialized ✅");
+  await createDatabase().then(() => {
+    console.log("Database initialized ✅");
+    startEventOutboxPublisher();
+    seedMySQL();
+  });
 
-  //await seedMySQL(); // Seed the database
   console.log("Database seeded ✅");
 } catch (error) {
   console.error("Error initializing services:", error);

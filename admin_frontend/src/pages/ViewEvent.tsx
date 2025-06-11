@@ -149,7 +149,7 @@ const ViewEvent = () => {
           </div>
           
           <div className="flex justify-between">
-            <Link to="/events" className="bg-gray-700 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors">
+            <Link to="/" className="bg-gray-700 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors">
               Back to Events
             </Link>
             <Link to={`/events/${id}/edit`} className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
