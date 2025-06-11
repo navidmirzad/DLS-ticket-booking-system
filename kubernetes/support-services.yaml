@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mail-service
+  namespace: ticket-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mail-service
+  template:
+    metadata:
+      labels:
+        app: mail-service
+    spec:
+      containers:
+      - name: mail-service
+        image: samimms/mail-service:latest
+        ports:
+        - containerPort: 3003
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://admin:admin@rabbitmq:5672"
+        - name: MAIL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mail-secret
+              key: MAIL_HOST
+        - name: MAIL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mail-secret
+              key: MAIL_USERNAME
+        - name: MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mail-secret
+              key: MAIL_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mail-service
+  namespace: ticket-system
+spec:
+  selector:
+    app: mail-service
+  ports:
+  - port: 3003
+    targetPort: 3003
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-sync-service
+  namespace: ticket-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: admin-sync-service
+  template:
+    metadata:
+      labels:
+        app: admin-sync-service
+    spec:
+      containers:
+      - name: admin-sync-service
+        image: samimms/admin-sync-service:latest
+        ports:
+        - containerPort: 3004
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: MYSQL_HOST
+          value: "mysql"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_USER
+          value: "ticket_user"
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: user-password
+        - name: MYSQL_DATABASE
+          value: "ticket_system"
+        - name: MONGODB_URL
+          value: "mongodb://mongodb:27017/customer_db"
+        - name: RABBITMQ_URL
+          value: "amqp://admin:admin@rabbitmq:5672"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-sync-service
+  namespace: ticket-system
+spec:
+  selector:
+    app: admin-sync-service
+  ports:
+  - port: 3004
+    targetPort: 3004
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-sync-service
+  namespace: ticket-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-sync-service
+  template:
+    metadata:
+      labels:
+        app: customer-sync-service
+    spec:
+      containers:
+      - name: customer-sync-service
+        image: samimms/customer-sync-service:latest
+        ports:
+        - containerPort: 3005
+        env:
+        - name: NODE_ENV
+          value: ${NODE_ENV}
+        - name: DATABASE_URL
+          value: "mongodb://mongodb:27017/${CUSTOMER_DB}"
+        - name: RABBITMQ_URL
+          value: "amqp://admin:admin@rabbitmq:5672"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-sync-service
+  namespace: ticket-system
+spec:
+  selector:
+    app: customer-sync-service
+  ports:
+  - port: 3005
+    targetPort: 3005
+  type: ClusterIP 

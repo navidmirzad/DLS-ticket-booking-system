@@ -6,18 +6,36 @@ dotenv.config();
 
 const POLL_INTERVAL_MS = 5000;
 
+// Log environment variables (excluding sensitive ones)
+console.log('Database Configuration:', {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME
+});
+
 const dbConfig = {
-  host: "mysql",
-  port: 3306,
-  user: "admin",
-  password: "adminpassword",
-  database: "admin_db",
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: {
+    rejectUnauthorized: false
+  }
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const runPublisher = async () => {
   while (true) {
+    console.log('Attempting to connect to MySQL with config:', {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      user: dbConfig.user,
+      database: dbConfig.database
+    });
+    
     const connection = await mysql.createConnection(dbConfig);
     try {
       const [rows] = await connection.query(

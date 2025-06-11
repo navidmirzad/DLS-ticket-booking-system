@@ -1,11 +1,10 @@
 import axios, { AxiosResponse as AxiosOriginalResponse } from 'axios';
+import { config } from '../config';
 
 type AxiosResponse<T = unknown> = AxiosOriginalResponse<T>;
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
-
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: config.BACKEND_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-frontend
+  namespace: ticket-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: admin-frontend
+  template:
+    metadata:
+      labels:
+        app: admin-frontend
+    spec:
+      containers:
+      - name: admin-frontend
+        image: samimms/admin-frontend:latest
+        ports:
+        - containerPort: 81
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-frontend
+  namespace: ticket-system
+spec:
+  selector:
+    app: admin-frontend
+  ports:
+  - port: 81
+    targetPort: 81
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-frontend
+  namespace: ticket-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-frontend
+  template:
+    metadata:
+      labels:
+        app: customer-frontend
+    spec:
+      containers:
+      - name: customer-frontend
+        image: samimms/customer-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-secret
+              key: STRIPE_PUBLIC_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-frontend
+  namespace: ticket-system
+spec:
+  selector:
+    app: customer-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer 

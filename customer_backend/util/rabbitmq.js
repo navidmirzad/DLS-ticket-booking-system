@@ -10,7 +10,7 @@ let channel;
 const ensureMongoConnected = async () => {
   if (mongoose.connection.readyState !== 1) {
     console.log("MongoDB not connected. Connecting...");
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(process.env.DATABASE_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
