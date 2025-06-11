@@ -68,7 +68,10 @@ const EventForm = () => {
         await createEvent(eventData);
         setStatus(`Event created successfully!`);
         setFormData({ title: "", description: "", date: "", location: "", image: "", capacity: 0 });
-        navigate("/");
+        setTimeout(() => {
+          navigate("/", { replace: true });
+          navigate(0);
+        }, 1000);
       }
     } catch (err) {
       console.error(err);

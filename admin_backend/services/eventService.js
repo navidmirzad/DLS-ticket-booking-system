@@ -8,8 +8,8 @@ import Event from "../models/Event.js";
  */
 const enqueueOutboxEvent = async (connection, type, payload) => {
   await connection.query(
-    `INSERT INTO EVENT_OUTBOX (event_type, payload) VALUES (?, ?)`,
-    [type, JSON.stringify(payload)]
+    `INSERT INTO EVENT_OUTBOX (event_type, payload, published) VALUES (?, ?, ?)`,
+    [type, JSON.stringify(payload), false]
   );
 };
 
