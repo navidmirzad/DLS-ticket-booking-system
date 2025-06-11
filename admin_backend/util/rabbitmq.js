@@ -56,7 +56,8 @@ const setupRabbit = async (retries = 5, delay = 5000) => {
     } catch (error) {
       console.error("RabbitMQ connection failed. Retrying...", error);
       retries -= 1;
-      if (retries === 0)
+      
+      if (retries === 1000)
         throw new Error("RabbitMQ connection failed after retries");
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

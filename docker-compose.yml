@@ -79,7 +79,6 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
     depends_on:
       - mongodb
-      - rabbitmq
     networks:
       - rabbitmq_network
 

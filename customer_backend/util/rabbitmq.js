@@ -1,9 +1,10 @@
 import amqp from "amqplib";
 import dotenv from "dotenv";
-import { Event } from "../models/mongo/index.js"; // Import the Event model
-import mongoose from "mongoose"; // Add this for MongoDB connection check
+import { Event } from "../models/mongo/index.js"; // Your Mongoose model
+import mongoose from "mongoose";
 
 dotenv.config();
+
 let channel;
 
 // Ensure MongoDB is connected before consuming messages
@@ -19,40 +20,61 @@ const ensureMongoConnected = async () => {
 };
 
 export const connectRabbit = async () => {
-  console.log("Connecting to RabbitMQ:", process.env.RABBITMQ_URL);
-  const conn = await amqp.connect(process.env.RABBITMQ_URL);
-  channel = await conn.createChannel();
-  await channel.assertQueue("eventQueue");
-  await channel.assertQueue("ticketQueue");
-  await channel.assertQueue("emailQueue");
-  console.log("RabbitMQ connected and queues asserted.");
+  const retryDelay = 5000;
 
-  // Register consumer after (re)connect
-  await consumeQueue();
+  const tryConnect = async () => {
+    try {
+      console.log("Connecting to RabbitMQ:", process.env.RABBITMQ_URL);
+      const conn = await amqp.connect(process.env.RABBITMQ_URL);
 
-  // Handle connection close/errors for auto-reconnect
-  conn.on("close", async () => {
-    console.error("RabbitMQ connection closed. Reconnecting...");
-    channel = null;
-    setTimeout(connectRabbit, 5000); // Retry after 5 seconds
-  });
-  conn.on("error", (err) => {
-    console.error("RabbitMQ connection error:", err);
-  });
+      channel = await conn.createChannel();
+      await channel.assertQueue("eventQueue");
+      await channel.assertQueue("ticketQueue");
+      await channel.assertQueue("emailQueue");
+      console.log("RabbitMQ connected and queues asserted.");
+
+      await consumeQueue();
+
+      conn.on("close", () => {
+        console.error("RabbitMQ connection closed. Reconnecting...");
+        channel = null;
+        setTimeout(tryConnect, retryDelay);
+      });
+
+      conn.on("error", (err) => {
+        console.error("RabbitMQ connection error:", err.message);
+      });
+
+    } catch (err) {
+      console.error("RabbitMQ connection failed:", err.message);
+      setTimeout(tryConnect, retryDelay);
+    }
+  };
+
+  tryConnect();
 };
 
 export const sendToQueue = async (data) => {
-  if (!channel) throw new Error("RabbitMQ channel not initialized");
+  if (!channel) {
+    console.warn("Cannot send to queue, RabbitMQ not connected.");
+    return;
+  }
   channel.sendToQueue("emailQueue", Buffer.from(JSON.stringify(data)));
 };
 
 export const sendTicketToQueue = async (data) => {
-  if (!channel) throw new Error("RabbitMQ channel not initialized");
+  if (!channel) {
+    console.warn("Cannot send to queue, RabbitMQ not connected.");
+    return;
+  }
   channel.sendToQueue("ticketQueue", Buffer.from(JSON.stringify(data)));
 };
 
 export const consumeQueue = async () => {
-  if (!channel) throw new Error("RabbitMQ channel not initialized");
+  if (!channel) {
+    console.warn("Cannot consume queue, RabbitMQ not connected.");
+    return;
+  }
 
   await ensureMongoConnected();
 
@@ -69,7 +91,7 @@ export const consumeQueue = async () => {
             console.log("Event saved to MongoDB:", saved);
           } else if (event.type === "EventUpdated") {
             const updated = await Event.findOneAndUpdate(
-              { id: String(event.payload.id) }, // always use string for id
+              { id: String(event.payload.id) },
               event.payload,
               { new: true }
             );
@@ -80,21 +102,18 @@ export const consumeQueue = async () => {
           } else {
             console.log("Unknown event type:", event.type);
           }
-          channel.ack(msg); // Acknowledge only after successful processing
+
+          channel.ack(msg);
         } catch (error) {
-          console.error(
-            "Error processing event:",
-            error,
-            "Payload:",
-            event.payload
-          );
-          // Optionally: don't ack, so message will be retried
+          console.error("Error processing event:", error, "Payload:", event.payload);
+          // No ack here to allow retry
         }
       } else {
         console.log("Received null message from eventQueue.");
       }
     },
-    { noAck: false } // Reliable delivery
+    { noAck: false }
   );
+
   console.log("RabbitMQ consumer started for eventQueue.");
 };
